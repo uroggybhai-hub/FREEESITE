@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title> Codeify Payments checkout Style</title>
+    <meta name="theme-color" content="#0a0a0f">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* =========================================================
+           1. CSS VARIABLES & RESET
+           ========================================================= */
+        :root {
+            --bg-dark: #07070a;
+            --bg-card: rgba(18, 18, 24, 0.6);
+            --neon-green: #39ff14;
+            --neon-glow: rgba(57, 255, 20, 0.4);
+            --text-main: #ffffff;
+            --text-muted: #8a8a93;
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --danger: #ff4757;
+            --warning: #ffa502;
+            --success: #2ed573;
+            --app-gpay: #1a73e8;
+            --app-phonepe: #5f259f;
+            --app-paytm: #00b9f1;
+            --app-bhim: #ea7b24;
+            --font-main: 'Outfit', sans-serif;
+            --font-mono: 'Space Grotesk', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient Glow Backgrounds */
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: breathe 8s infinite alternate ease-in-out;
+        }
+        .glow-top { top: -100px; left: -100px; width: 400px; height: 400px; background: rgba(57, 255, 20, 0.15); }
+        .glow-bottom { bottom: -100px; right: -100px; width: 500px; height: 500px; background: rgba(0, 150, 255, 0.08); }
+
+        @keyframes breathe {
+            0% { transform: scale(1); opacity: 0.3; }
+            100% { transform: scale(1.1); opacity: 0.6; }
+        }
+
+        /* =========================================================
+           2. MAIN CONTAINER & GLASSMORPHISM
+           ========================================================= */
+        .gateway-container {
+            width: 100%;
+            max-width: 440px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .glass-box {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 30px 25px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+            position: relative;
+            overflow: hidden;
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(40px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Top Header */
+        .header-brand {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-glass);
+            padding-bottom: 15px;
+        }
+        .logo { font-size: 1.2rem; font-weight: 700; color: var(--neon-green); display: flex; align-items: center; gap: 8px; }
+        .logo i { filter: drop-shadow(0 0 8px var(--neon-glow)); }
+        .timer-badge {
+            background: rgba(255, 71, 87, 0.1);
+            color: var(--danger);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            border: 1px solid rgba(255, 71, 87, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* =========================================================
+           3. PAYMENT DETAILS & AMOUNT
+           ========================================================= */
+        .payment-meta { text-align: center; margin-bottom: 25px; }
+        .paying-to { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px; }
+        .seller-name { font-size: 1.1rem; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 5px; }
+        .verified-icon { color: var(--neon-green); font-size: 0.9rem; }
+        
+        .amount-display {
+            font-family: var(--font-mono);
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 10px 0;
+            letter-spacing: -1px;
+            text-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+        .amount-display span { font-size: 2rem; color: var(--neon-green); vertical-align: super; margin-right: 5px; }
+
+        /* =========================================================
+           4. QR CODE SECTION
+           ========================================================= */
+        .qr-wrapper {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 20px;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            position: relative;
+            box-shadow: 0 0 30px rgba(77, 355, 40, 1.15);
+            border: 4px solid rgba(77, 355, 40, 1.2);
+        }
+        .qr-wrapper img { width: 100%; height: 100%; object-fit: contain; }
+        
+        /* QR Scanning Animation Line */
+        .scan-line {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: var(--neon-green);
+            box-shadow: 0 0 15px var(--neon-green);
+            animation: scanLine 1.5s linear infinite;
+        }
+        @keyframes scanLine {
+            0% { top: 10%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 90%; opacity: 0; }
+        }
+
+        .upi-id-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid var(--border-glass);
+        }
+        .upi-id-box:hover { border-color: var(--neon-green); color: #fff; }
+
+        /* =========================================================
+           5. APP BUTTONS (GPAY, PHONEPE, ETC)
+           ========================================================= */
+        .divider {
+            display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.85rem; margin: 25px 0;
+        }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-glass); }
+        .divider::before { margin-right: .5em; }
+        .divider::after { margin-left: .5em; }
+
+        .app-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
+        
+        .app-btn {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 14px; border-radius: 14px; text-decoration: none; font-weight: 600;
+            color: #fff; font-size: 0.95rem; transition: transform 0.2s, box-shadow 0.2s;
+            border: none; cursor: pointer; position: relative; overflow: hidden;
+        }
+        .app-btn:active { transform: scale(0.96); }
+        .app-btn img { width: 24px; height: 24px; }
+        
+        .btn-gpay { background: linear-gradient(135deg, #1a73e8, #0b50a8); box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3); }
+        .btn-phonepe { background: linear-gradient(135deg, #5f259f, #411473); box-shadow: 0 4px 15px rgba(95, 37, 159, 0.3); }
+        .btn-paytm { background: linear-gradient(135deg, #00b9f1, #008fbb); box-shadow: 0 4px 15px rgba(0, 185, 241, 0.3); }
+        .btn-other { background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); }
+        .btn-other:hover { background: rgba(255,255,255,0.1); }
+
+        /* =========================================================
+           6. UTR SUBMISSION FORM
+           ========================================================= */
+        .utr-section {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px dashed var(--border-glass);
+        }
+        
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-group input {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-glass);
+            padding: 16px 16px 16px 45px;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-family: var(--font-mono);
+            outline: none;
+            transition: 0.3s;
+            letter-spacing: 2px;
+        }
+        .input-group i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+        .input-group input:focus { border-color: var(--neon-green); box-shadow: 0 0 15px var(--neon-dim); background: rgba(0,0,0,0.6); }
+        .input-group input:focus + i { color: var(--neon-green); }
+
+        .submit-btn {
+            width: 100%; padding: 16px; background: var(--neon-green); color: #000;
+            border: none; border-radius: 12px; font-weight: 700; font-size: 1rem;
+            text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+            transition: 0.3s; box-shadow: 0 0 20px var(--neon-dim);
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .submit-btn:hover { box-shadow: 0 0 30px var(--neon-glow); transform: translateY(-2px); }
+
+        /* How to find UTR Dropdown */
+        .help-text { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 15px; cursor: pointer; transition: 0.2s; }
+        .help-text:hover { color: var(--neon-green); }
+
+        /* =========================================================
+           7. STATES (LOADING, PROCESSING, SUCCESS)
+           ========================================================= */
+        .state-layer { display: none; text-align: center; padding: 30px 0; }
+        .state-layer.active { display: block; animation: slideUpFade 0.5s; }
+
+        /* Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 400% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        
+        .skel-text { height: 20px; width: 60%; margin: 10px auto; }
+        .skel-title { height: 40px; width: 80%; margin: 15px auto; }
+        .skel-qr { width: 200px; height: 200px; margin: 20px auto; border-radius: 20px; }
+
+        /* Radar Processing Spinner */
+        .radar-spinner {
+            width: 100px; height: 100px; margin: 0 auto 30px; position: relative;
+            border-radius: 50%; border: 2px solid rgba(57, 255, 20, 0.2);
+        }
+        .radar-spinner::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%; border-top: 2px solid var(--neon-green);
+            animation: spin 1s linear infinite;
+        }
+        .radar-spinner i { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; color: var(--neon-green); }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Success Animation */
+        .success-circle {
+            width: 120px; height: 120px; margin: 0 auto 20px;
+            border-radius: 50%; background: rgba(46, 213, 115, 0.1);
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 40px rgba(46, 213, 115, 0.3);
+            position: relative;
+        }
+        .success-circle svg { width: 60px; height: 60px; }
+        .success-circle path {
+            stroke-dasharray: 100; stroke-dashoffset: 100;
+            animation: drawCheck 0.8s ease-out forwards; animation-delay: 0.2s;
+        }
+        @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+
+        /* =========================================================
+           8. TOAST NOTIFICATIONS
+           ========================================================= */
+        #toast-box {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: column; gap: 10px; z-index: 9999; pointer-events: none;
+        }
+        .toast {
+            background: rgba(20, 20, 25, 0.95); backdrop-filter: blur(10px);
+            border-left: 4px solid var(--neon-green);
+            color: #fff; padding: 14px 24px; border-radius: 8px; font-weight: 500; font-size: 0.9rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 12px;
+            animation: toastSlideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .toast.error { border-left-color: var(--danger); }
+        .toast i { font-size: 1.2rem; }
+        .toast.success i { color: var(--neon-green); }
+        .toast.error i { color: var(--danger); }
+        @keyframes toastSlideDown { 0% { opacity: 0; transform: translateY(-50px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes toastFadeOut { 100% { opacity: 0; transform: translateY(-20px); } }
+
+        /* Trust Footer */
+        .trust-footer {
+            margin-top: 30px; display: flex; justify-content: center; gap: 15px; color: var(--text-muted); font-size: 0.75rem;
+        }
+        .trust-footer div { display: flex; align-items: center; gap: 5px; }
+        .trust-footer i { color: var(--neon-green); }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Backgrounds -->
+    <div class="ambient-glow glow-top"></div>
+    <div class="ambient-glow glow-bottom"></div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-box"></div>
+
+    <!-- Main Wrapper -->
+    <div class="gateway-container">
+        
+        <div class="glass-box" id="main-card">
+            
+            <!-- STATE 1: LOADING SKELETON -->
+            <div id="state-loading" class="state-layer active">
+                <div class="header-brand">
+                    <div class="skeleton" style="width: 100px; height: 24px;"></div>
+                </div>
+                <div class="skeleton skel-text"></div>
+                <div class="skeleton skel-title"></div>
+                <div class="skeleton skel-qr"></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 30px;">
+                    <div class="skeleton" style="height: 50px; border-radius: 12px;"></div>
+                    <div class="skeleton" style="height: 50px; border-radius: 12px;"></div>
+                </div>
+            </div>
+
+            <!-- STATE 2: ERROR -->
+            <div id="state-error" class="state-layer">
+                <i class="fa-solid fa-triangle-exclamation" style="font-size: 4rem; color: var(--danger); margin-bottom: 20px;"></i>
+                <h2 style="margin-bottom: 10px;">Invalid Payment Link    </h2>
+                <p class="text-muted" id="error-msg">The payment link you are trying to access is broken, expired, or doesn't exist🙏.</p>
+            </div>
+
+            <!-- STATE 3: PAYMENT GATEWAY (MAIN) -->
+            <div id="state-payment" class="state-layer">
+                <!-- Header -->
+                <div class="header-brand">
+                    <div class="logo"><i class="fa-solid fa-bolt"></i> Codeify Pay</div>
+                    <div class="timer-badge">
+                        <i class="fa-regular fa-clock"></i> <span id="countdown">10:00</span>
+                    </div>
+                </div>
+
+                <!-- Meta Details -->
+                <div class="payment-meta">
+                    <p class="paying-to">Paying to</p>
+                    <div class="seller-name"><span id="p-seller">Loading Seller...</span> <i class="fa-solid fa-circle-check verified-icon" title="Verified Merchant"></i></div>
+                    <div class="amount-display"><span>₹</span><span id="p-amount" style="color:#fff; font-size:3.5rem;">0.00</span></div>
+                </div>
+
+                <!-- QR Code Box -->
+                <div class="qr-wrapper">
+                    <div class="scan-line"></div>
+                    <img id="qr-image" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="UPI QR Code">
+                </div>
+
+                <!-- UPI ID Copy -->
+                <div class="upi-id-box" onclick="copyUpiId()">
+                    <span id="p-upi-id">enchineomolla-1@okicici</span>
+                    <i class="fa-regular fa-copy"></i>
+                </div>
+
+                <!-- Mobile Intent Buttons -->
+                <div id="mobile-intents">
+                    <div class="divider">Pay Directly via App</div>
+                    <div class="app-grid">
+                        <a href="#" class="app-btn btn-gpay" id="btn-gpay">
+                            <i class="fa-brands fa-google"></i> GPay
+                        </a>
+                        <a href="#" class="app-btn btn-phonepe" id="btn-phonepe">
+                            <!-- PhonePe approximate icon -->
+                            <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                            PhonePe
+                        </a>
+                        <a href="#" class="app-btn btn-paytm" id="btn-paytm">
+                            <i class="fa-solid fa-wallet"></i> Paytm
+                        </a>
+                        <a href="#" class="app-btn btn-other" id="btn-other">
+                            <i class="fa-solid fa-building-columns"></i> Other UPI
+                        </a>
+                    </div>
+                </div>
+
+                <!-- UTR Verification Form -->
+                <div class="utr-section">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 15px; text-align: left;">Verify Payment</h3>
+                    <div class="input-group">
+                        <input type="tel" id="utr-input" placeholder="Enter 12-Digit UTR No." maxlength="12" autocomplete="off" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        <i class="fa-solid fa-hashtag"></i>
+                    </div>
+                    <button class="submit-btn" onclick="submitVerification()">
+                        Secure Verify <i class="fa-solid fa-shield-halved"></i>
+                    </button>
+                    <div class="help-text" onclick="showToast('Open your UPI app history, click the transaction, and copy the 12-digit UPI Ref/UTR number.', 'success')">
+                        <i class="fa-regular fa-circle-question"></i> How to find UTR number?
+                    </div>
+                </div>
+            </div>
+
+            <!-- STATE 4: PROCESSING -->
+            <div id="state-processing" class="state-layer">
+                <div class="radar-spinner">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                </div>
+                <h2 style="color: var(--neon-green); margin-bottom: 10px;">Verifying Payment...</h2>
+                <p class="text-muted" style="font-size: 0.95rem; line-height: 1.5; padding: 0 20px;">
+                    Please do not close this window or press back. We are securely checking the bank servers for your transaction <b id="proc-utr" style="color:#fff;"></b>.
+                </p>
+                <div style="margin-top: 30px; font-family: var(--font-mono); font-size: 0.85rem; color: var(--warning);">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i> Auto-verifying in background...
+                </div>
+            </div>
+
+            <!-- STATE 5: SUCCESS -->
+            <div id="state-success" class="state-layer">
+                <div class="success-circle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <h1 style="color: var(--success); margin-bottom: 10px;">Payment Successful!</h1>
+                <p class="text-muted" style="margin-bottom: 25px;">Amount sent to <b id="s-seller" style="color:#fff;">Seller</b></p>
+                
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: 16px; padding: 20px; text-align: left; margin-bottom: 20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
+                        <span class="text-muted">Amount Paid</span>
+                        <b style="font-family: var(--font-mono); font-size: 1.1rem;">₹<span id="s-amount">0.00</span></b>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
+                        <span class="text-muted">Transaction ID</span>
+                        <b style="font-family: var(--font-mono); font-size: 0.9rem;" id="s-utr">-------</b>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span class="text-muted">Date & Time</span>
+                        <b style="font-size: 0.85rem;" id="s-date">--</b>
+                    </div>
+                </div>
+
+                <button class="submit-btn" style="background: rgba(255,255,255,0.1); color: #fff; box-shadow: none;" onclick="window.close()">
+                    Close Window
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Trust Badges Footer -->
+        <div class="trust-footer">
+            <div><i class="fa-solid fa-lock"></i> 256-bit SSL</div>
+            <div><i class="fa-solid fa-shield-check"></i> 100% Secure</div>
+            <div><i class="fa-brands fa-monero"></i> UPI Verified</div>
+        </div>
+
+    </div>
+
+    <!-- =========================================================
+         JAVASCRIPT & FIREBASE INTEGRATION
+         ========================================================= -->
+    <!-- Import Modular Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Firebase Configuration (Strictly as provided)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBv2Um04tsv8z2XItB4j-gLb9yU5qDyogU",
+            databaseURL: "https://all-time-18453-default-rtdb.firebaseio.com",
+            projectId: "all-time-18453",
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Constants & Global Variables
+        const ADMIN_UPI = "enchineomolla-1@okicici"; // Strictly as requested
+        const urlParams = new URLSearchParams(window.location.search);
+        const txId = urlParams.get('id');
+        let currentTxData = null;
+        let timerInterval = null;
+
+        /* =========================================================
+           UI HELPERS & TOAST SYSTEM
+           ========================================================= */
+        window.showToast = (message, type = 'success') => {
+            const box = document.getElementById('toast-box');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation';
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+            
+            box.appendChild(toast);
+            
+            // Auto remove
+            setTimeout(() => {
+                toast.style.animation = 'toastFadeOut 0.4s forwards';
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        };
+
+        window.switchState = (stateId) => {
+            document.querySelectorAll('.state-layer').forEach(layer => {
+                layer.classList.remove('active');
+            });
+            document.getElementById(`state-${stateId}`).classList.add('active');
+        };
+
+        window.copyUpiId = () => {
+            navigator.clipboard.writeText(ADMIN_UPI).then(() => {
+                showToast("UPI ID Copied to clipboard!");
+            });
+        };
+
+        /* =========================================================
+           COUNTDOWN TIMER LOGIC
+           ========================================================= */
+        function startTimer(durationInSeconds) {
+            let timer = durationInSeconds;
+            const display = document.getElementById('countdown');
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                let minutes = parseInt(timer / 60, 10);
+                let seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                if (--timer < 0) {
+                    clearInterval(timerInterval);
+                    display.textContent = "Expired";
+                    document.getElementById('error-msg').innerText = "This payment link has expired due to timeout. Please request a new link.";
+                    switchState('error');
+                }
+            }, 1000);
+        }
+
+        /* =========================================================
+           FIREBASE LOGIC & INITIALIZATION
+           ========================================================= */
+        
+        // 1. Initial Validation
+        if (!txId) {
+            document.getElementById('error-msg').innerText = "No Transaction ID provided in the URL.";
+            switchState('error');
+        } else {
+            // Start listening to the transaction data
+            const txRef = ref(db, 'transactions/' + txId);
+            
+            onValue(txRef, (snapshot) => {
+                const data = snapshot.val();
+                currentTxData = data;
+
+                // Handle missing data
+                if (!data) {
+                    document.getElementById('error-msg').innerText = "Transaction not found. The link might be incorrect.";
+                    switchState('error');
+                    return;
+                }
+
+                // Handle Success State routing
+                if (data.status === 'Success') {
+                    clearInterval(timerInterval);
+                    document.getElementById('s-amount').innerText = parseFloat(data.amount).toFixed(2);
+                    document.getElementById('s-seller').innerText = data.seller;
+                    document.getElementById('s-utr').innerText = data.entered_utr || "Verified Automatically";
+                    document.getElementById('s-date').innerText = new Date().toLocaleString();
+                    switchState('success');
+                    return;
+                }
+
+                // Handle Processing State routing
+                if (data.status === 'Processing') {
+                    document.getElementById('proc-utr').innerText = data.entered_utr;
+                    switchState('processing');
+                    return;
+                }
+
+                // Handle Pending State (Show Payment UI)
+                if (data.status === 'Pending') {
+                    // Populate UI
+                    document.getElementById('p-seller').innerText = data.seller;
+                    document.getElementById('p-amount').innerText = parseFloat(data.amount).toFixed(2);
+                    document.getElementById('p-upi-id').innerText = ADMIN_UPI;
+
+                    // Generate UPI Intent URL string
+                    // Note: 'pn' is Payee Name, 'pa' is Payee Address, 'am' is Amount, 'cu' is Currency
+                    const upiString = `upi://pay?pa=${ADMIN_UPI}&pn=${encodeURIComponent(data.seller)}&am=${data.amount}&cu=INR&tn=Payment_To_${encodeURIComponent(data.seller)}`;
+                    
+                    // Generate High Quality QR Code
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiString)}&margin=10`;
+                    document.getElementById('qr-image').src = qrUrl;
+
+                    // Set Intent Button Hrefs
+                    document.getElementById('btn-gpay').href = upiString;
+                    document.getElementById('btn-phonepe').href = upiString;
+                    document.getElementById('btn-paytm').href = upiString;
+                    document.getElementById('btn-other').href = upiString;
+
+                    // Only Start timer if not already running (10 minutes)
+                    if(!timerInterval) startTimer(600); 
+
+                    // Show gateway UI
+                    switchState('payment');
+                }
+            });
+        }
+
+        /* =========================================================
+           UTR VERIFICATION SUBMISSION
+           ========================================================= */
+        window.submitVerification = async () => {
+            const utrInput = document.getElementById('utr-input').value.trim();
+            const btn = document.querySelector('.submit-btn');
+
+            // Strict Validation
+            if (!utrInput) {
+                return showToast("Please enter the UTR number.", "error");
+            }
+            if (utrInput.length !== 12) {
+                return showToast("UTR must be exactly 12 digits.", "error");
+            }
+            if (!/^\d+$/.test(utrInput)) {
+                return showToast("UTR must contain numbers only.", "error");
+            }
+
+            // Button Loading State
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Submitting...`;
+            btn.style.pointerEvents = 'none';
+
+            try {
+                // Update Firebase Status to 'Processing'
+                // The Google Apps Script will detect this and verify via Email
+                const txRef = ref(db, 'transactions/' + txId);
+                await update(txRef, {
+                    entered_utr: utrInput,
+                    status: 'Processing',
+                    processing_started_at: Date.now()
+                });
+                
+                // Note: The UI will automatically shift to the 'processing' state 
+                // because of the onValue listener reacting to the DB change.
+
+            } catch (error) {
+                showToast("Connection error. Please try again.", "error");
+                btn.innerHTML = `Secure Verify <i class="fa-solid fa-shield-halved"></i>`;
+                btn.style.pointerEvents = 'auto';
+            }
+        };
+
+        /* =========================================================
+           DEVICE DETECTION OPTIMIZATION
+           ========================================================= */
+        // Optional: Hide App buttons on Desktop to prevent broken links
+        document.addEventListener("DOMContentLoaded", () => {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (!isMobile) {
+                // If on desktop, encourage scanning QR rather than clicking intents
+                const intentSection = document.getElementById('mobile-intents');
+                if(intentSection) {
+                    intentSection.style.opacity = '0.5';
+                    intentSection.style.pointerEvents = 'none';
+                    intentSection.insertAdjacentHTML('afterbegin', `<p style="color:var(--warning); font-size:0.8rem; text-align:center; margin-bottom:10px;">Scan QR code above from your mobile app.</p>`);
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
