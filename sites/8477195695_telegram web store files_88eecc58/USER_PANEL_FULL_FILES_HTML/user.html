@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Codeify Store</title>
+    
+    <!-- CSS Dependencies -->
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <!-- Monetag Rewarded Ads -->
+    <script src="//libtl.com/sdk.js" data-zone="10576842" data-sdk="show_10576842"></script>
+</head>
+<body class="dark-theme">
+
+    <!-- Screen Loader -->
+    <div id="main-loader" class="screen-loader flex-center flex-col">
+        <div class="spinner"></div>
+        <h3 class="text-gradient mt-2">Loading App...</h3>
+    </div>
+
+    <!-- ======================= TOP BAR ======================= -->
+    <header class="top-bar glass">
+        <div class="menu-icon" onclick="toggleDrawer()">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="app-title text-gradient">Store Hub</div>
+        <div class="coin-balance">
+            <i class="fas fa-coins text-warning pulse-icon"></i> 
+            <span id="top-balance">0</span>
+        </div>
+    </header>
+
+    <!-- ======================= SIDE DRAWER ======================= -->
+    <div class="drawer-overlay" onclick="toggleDrawer()"></div>
+    <div class="drawer glass">
+        <div class="drawer-header flex-center flex-col">
+            <img id="drawer-avatar" src="https://via.placeholder.com/80" alt="Avatar">
+            <h3 id="drawer-name" class="mt-1">User Name</h3>
+            <p class="text-sm text-muted">Member</p>
+        </div>
+        <ul class="drawer-menu">
+            <li onclick="openModal('notificationsModal'); toggleDrawer()">
+                <i class="fas fa-bell"></i> Notifications
+            </li>
+            <li onclick="switchTab('home'); toggleDrawer()">
+                <i class="fas fa-layer-group"></i> Card Page
+            </li>
+            <li onclick="openModal('addFileModal'); toggleDrawer()">
+                <i class="fas fa-cloud-upload-alt"></i> Add Your File
+            </li>
+            <li onclick="openModal('adRunModal'); toggleDrawer()">
+                <i class="fas fa-ad"></i> File Ad Run
+            </li>
+            <li onclick="window.location.href='index.html'">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </li>
+        </ul>
+        <div class="drawer-footer text-center p-2 text-sm text-muted">
+            v1.0.0 © Codeify Store
+        </div>
+    </div>
+
+    <!-- ======================= MAIN CONTENT ======================= -->
+    <main class="content-area">
+        
+        <!-- 1. HOME TAB -->
+        <section id="home" class="tab-content active">
+            <!-- Auto Slider for Ads -->
+            <div class="slider-container glass" id="ad-slider">
+                <div class="slider-placeholder flex-center h-100">Loading Banners...</div>
+            </div>
+            
+            <!-- Category Filter -->
+            <div class="categories mt-2 scroll-x">
+                <button class="cat-btn active" onclick="filterCat('All')">All</button>
+                <button class="cat-btn" onclick="filterCat('HTML')">HTML</button>
+                <button class="cat-btn" onclick="filterCat('App')">App</button>
+                <button class="cat-btn" onclick="filterCat('Prompt')">Prompt</button>
+                <button class="cat-btn" onclick="filterCat('SWB')">SWB</button>
+                <button class="cat-btn" onclick="filterCat('Zip')">Zip</button>
+                <button class="cat-btn" onclick="filterCat('Bot')">Bot</button>
+            </div>
+            
+            <!-- File Grid -->
+            <div class="file-grid mt-2" id="home-file-grid">
+                <!-- Data fetched via JS -->
+            </div>
+        </section>
+
+        <!-- 2. SEARCH TAB -->
+        <section id="search" class="tab-content">
+            <div class="search-bar glass flex items-center p-1">
+                <i class="fas fa-search ml-1 text-muted"></i>
+                <input type="text" id="searchInput" placeholder="Search by name, category..." onkeyup="searchFiles()">
+            </div>
+            <div class="file-grid mt-2" id="search-file-grid">
+                <!-- Search Results go here -->
+            </div>
+        </section>
+
+        <!-- 3. EARN TAB -->
+        <section id="earn" class="tab-content">
+            <div class="balance-card glass flex-center flex-col p-2 text-center relative overflow-hidden">
+                <div class="bg-glow"></div>
+                <h3>Your Total Balance</h3>
+                <h1 class="text-gradient mt-1" style="font-size: 2.5rem;">
+                    <i class="fas fa-coins"></i> <span id="earn-balance">0</span>
+                </h1>
+            </div>
+            
+            <div class="earn-buttons flex-center mt-4 flex-col">
+                <!-- Round Watch Ads Button with Pulse Animation -->
+                <button class="btn-watch-round" onclick="watchAd()">
+                    <i class="fas fa-play"></i>
+                    <span>Watch Ads</span>
+                </button>
+                <p class="text-sm text-muted mt-2 text-center">Watch ads and earn 5 Coins instantly.</p>
+
+                <!-- Daily Bonus Button -->
+                <button class="btn-glass w-100 p-2 mt-4 flex space-between items-center" onclick="claimDaily()">
+                    <span><i class="fas fa-calendar-check text-warning"></i> Claim Daily Bonus</span>
+                    <strong class="text-success">+6 Coins</strong>
+                </button>
+            </div>
+
+            <h3 class="mt-4 mb-1 border-bottom pb-1">Available Tasks</h3>
+            <div id="tasks-list" class="task-container flex-col gap-1 mt-2">
+                <!-- Tasks fetched dynamically -->
+            </div>
+        </section>
+
+        <!-- 4. SUPPORT TAB -->
+        <section id="support" class="tab-content">
+            <div class="chat-container glass">
+                <div class="chat-header text-center border-bottom pb-1 mb-1">
+                    <h3><i class="fas fa-headset text-gradient"></i> Support Chat</h3>
+                    <p class="text-sm text-muted">Admin is here to help you</p>
+                </div>
+                <div class="chat-messages" id="chat-box">
+                    <div class="text-center text-muted mt-2">Connecting to secure chat...</div>
+                </div>
+                <div class="chat-input-area mt-1">
+                    <input type="text" id="chat-input" placeholder="Type your message or link here...">
+                    <button class="btn-gradient" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. PROFILE TAB -->
+        <section id="profile" class="tab-content">
+            <div class="profile-header glass flex-center flex-col text-center p-2 relative overflow-hidden">
+                <div class="bg-glow"></div>
+                <img id="profile-pic" class="rounded-circle avatar-lg" src="" alt="Profile">
+                <h2 id="profile-name" class="mt-1 text-gradient">User Name</h2>
+                <div class="coin-badge mt-1 text-lg">
+                    <i class="fas fa-coins text-warning"></i> <span id="profile-balance">0</span>
+                </div>
+            </div>
+            
+            <div class="referral-card glass mt-2 p-2 text-center">
+                <h3><i class="fas fa-users text-primary"></i> Invite & Earn</h3>
+                <p class="text-sm text-muted mt-1">Get 10 coins for every friend who joins using your link!</p>
+                <div class="flex mt-2 gap-1">
+                    <input type="text" id="ref-link" class="glass-input w-100 text-center" readonly>
+                    <button class="btn-gradient w-40" onclick="copyRef()">Copy Link</button>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <h3 class="border-bottom pb-1 mb-2">Purchased Files</h3>
+                <div id="purchased-list" class="purchased-list flex-col gap-1"></div>
+            </div>
+
+            <!-- Admin Access Button (Hidden by default) -->
+            <button id="admin-panel-btn" class="btn-danger w-100 mt-4 p-2 hidden shadow-lg" onclick="window.location.href='admin.html'">
+                <i class="fas fa-user-shield"></i> Open Admin Panel
+            </button>
+        </section>
+    </main>
+
+    <!-- ======================= BOTTOM NAVIGATION ======================= -->
+    <nav class="bottom-nav glass">
+        <div class="nav-item active" onclick="switchTab('home')">
+            <i class="fas fa-home"></i><span>Home</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('search')">
+            <i class="fas fa-search"></i><span>Search</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('earn')">
+            <i class="fas fa-gift"></i><span>Earn</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('support')">
+            <i class="fas fa-headset"></i><span>Support</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('profile')">
+            <i class="fas fa-user"></i><span>Profile</span>
+        </div>
+    </nav>
+
+    <!-- ======================= MODALS ======================= -->
+
+    <!-- 1. File Details Modal -->
+    <div id="fileDetailsModal" class="modal">
+        <div class="modal-content glass fade-in">
+            <span class="close" onclick="closeModal('fileDetailsModal')">&times;</span>
+            <div class="modal-slider">
+                <img id="detail-img" src="" alt="File Image" class="w-100 rounded">
+            </div>
+            <h2 id="detail-title" class="mt-2 text-gradient">File Title</h2>
+            <div class="price-box mt-1 flex items-center gap-1">
+                <span class="sell-price text-lg text-success font-bold"><i class="fas fa-coins"></i> <span id="detail-sell"></span></span>
+                <span class="real-price text-muted strike"><i class="fas fa-coins"></i> <span id="detail-real"></span></span>
+                <span class="discount-badge bg-danger text-white px-1 rounded text-sm" id="detail-discount"></span>
+            </div>
+            <div class="category-badge mt-1 text-sm text-primary" id="detail-category"></div>
+            <p id="detail-desc" class="mt-2 text-sm text-muted border-top pt-1 leading-relaxed"></p>
+            <div id="detail-action" class="mt-4">
+                <!-- Buy or Download Button Injected Here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Add File Modal -->
+    <div id="addFileModal" class="modal">
+        <div class="modal-content glass fade-in">
+            <span class="close" onclick="closeModal('addFileModal')">&times;</span>
+            <h2 class="text-gradient border-bottom pb-1">Upload Your File</h2>
+            <p class="text-sm text-muted mt-1 mb-2">Sell your digital products and earn coins!</p>
+            
+            <div class="form-group flex-col gap-1">
+                <input type="text" id="add-file-name" class="glass-input w-100" placeholder="File Name">
+                <input type="text" id="add-file-img" class="glass-input w-100" placeholder="Cover Image URL">
+                <input type="text" id="add-file-link" class="glass-input w-100" placeholder="Secret Download Link (Google Drive etc.)">
+                <div class="flex gap-1 w-100">
+                    <input type="number" id="add-file-price" class="glass-input w-50" placeholder="Sell Price">
+                    <input type="number" id="add-file-real-price" class="glass-input w-50" placeholder="Real Price">
+                </div>
+                <select id="add-file-cat" class="glass-input w-100">
+                    <option value="" disabled selected>Select Category</option>
+                    <option value="HTML">HTML</option>
+                    <option value="App">App</option>
+                    <option value="Prompt">Prompt</option>
+                    <option value="SWB">SWB</option>
+                    <option value="Zip">Zip</option>
+                    <option value="Bot">Bot</option>
+                </select>
+                <textarea id="add-file-desc" class="glass-input w-100" rows="3" placeholder="Description of your item..."></textarea>
+                <button class="btn-gradient w-100 mt-2 p-2 text-lg" onclick="submitFile()">
+                    <i class="fas fa-upload"></i> Submit for Approval
+                </button>
+            </div>
+            
+            <h3 class="mt-4 border-bottom pb-1">Your Uploads Status</h3>
+            <div id="user-uploads-list" class="mt-2 flex-col gap-1 max-h-40 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- 3. Notifications Modal -->
+    <div id="notificationsModal" class="modal">
+        <div class="modal-content glass fade-in">
+            <span class="close" onclick="closeModal('notificationsModal')">&times;</span>
+            <h2 class="text-gradient border-bottom pb-1"><i class="fas fa-bell"></i> Notifications</h2>
+            <div id="notif-list" class="mt-2 flex-col gap-1 max-h-60 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- 4. Ad Banner Run Modal -->
+    <div id="adRunModal" class="modal">
+        <div class="modal-content glass fade-in">
+            <span class="close" onclick="closeModal('adRunModal')">&times;</span>
+            <h2 class="text-gradient border-bottom pb-1">Run File Advertisement</h2>
+            <p class="text-sm text-muted mt-1 mb-2">Display your banner on the homepage to boost sales!</p>
+            
+            <div class="form-group flex-col gap-1">
+                <input type="text" id="ad-name" class="glass-input w-100" placeholder="Campaign Name">
+                <input type="text" id="ad-img" class="glass-input w-100" placeholder="Banner Image URL (Ratio 2:1)">
+                <input type="text" id="ad-link" class="glass-input w-100" placeholder="Redirect Link (File link or Telegram)">
+                <button class="btn-gradient w-100 mt-2 p-2" onclick="submitAdBanner()">
+                    <i class="fas fa-bullhorn"></i> Submit Banner Request
+                </button>
+            </div>
+            
+            <h3 class="mt-4 border-bottom pb-1">Your Campaigns</h3>
+            <div id="user-ads-list" class="mt-2 flex-col gap-1 max-h-40 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- ======================= GLOBAL TOAST NOTIFICATION ======================= -->
+    <div id="toast" class="toast glass hidden flex items-center justify-center gap-1">
+        <i class="fas fa-info-circle text-primary"></i> <span id="toast-msg">Message</span>
+    </div>
+
+    <!-- Javascript Logic -->
+    <script src="app.js"></script>
+    <script>
+        // Init the App when page loads
+        window.onload = () => { initApp(false); };
+    </script>
+</body>
+</html>
