@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MULTI PABEL - Owner Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --bg-color: #000000; --ios-glass: rgba(28, 28, 30, 0.55); --ios-border: rgba(255, 255, 255, 0.1);
+            --gold-premium: #E5C07B; --gold-gradient: linear-gradient(135deg, #F9D423 0%, #B8860B 100%);
+            --blue-ios: #0A84FF; --red-ios: #FF453A; --green-ios: #32D74B;
+            --text-main: #FFFFFF; --text-muted: #8E8E93; --input-bg: rgba(255, 255, 255, 0.06);
+            --fluid: cubic-bezier(0.25, 0.1, 0.25, 1); --spring: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; padding-bottom: 120px; overflow-x: hidden; background-image: radial-gradient(circle at 15% 0%, rgba(229, 192, 123, 0.15) 0%, transparent 45%), radial-gradient(circle at 85% 100%, rgba(10, 132, 255, 0.1) 0%, transparent 45%); background-attachment: fixed; }
+        .container { padding: 30px 20px; max-width: 600px; margin: 0 auto; perspective: 1000px; }
+        .screen { display: none; opacity: 0; transform: translateY(20px) scale(0.98); transition: all 0.4s var(--fluid); }
+        .screen.active { display: block; opacity: 1; transform: translateY(0) scale(1); animation: fadeUp 0.5s var(--spring) forwards; }
+        @keyframes fadeUp { 0% { opacity: 0; transform: translateY(20px) scale(0.98); filter: blur(5px); } 100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
+        .god-title { font-size: 34px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 25px; color: var(--text-main); }
+        .god-title span { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .section-tag { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600; }
+        .ios-card { background: var(--ios-glass); border-radius: 28px; padding: 24px; margin-bottom: 20px; border: 1px solid var(--ios-border); backdrop-filter: blur(50px) saturate(200%); box-shadow: 0 20px 40px rgba(0,0,0,0.3); transition: transform 0.3s var(--fluid); }
+        input, select, textarea { width: 100%; padding: 18px 20px; background: var(--input-bg); border: 1px solid transparent; color: var(--text-main); border-radius: 16px; margin-bottom: 16px; outline: none; font-size: 15px; transition: all 0.3s var(--fluid); font-weight: 500; }
+        input:focus, select:focus, textarea:focus { border-color: rgba(229, 192, 123, 0.5); background: rgba(255,255,255,0.08); }
+        .switch-container { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 18px 20px; border-radius: 16px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.04); }
+        .switch { position: relative; display: inline-block; width: 52px; height: 30px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.15); transition: 0.4s var(--fluid); border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background-color: #fff; transition: 0.4s var(--fluid); border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+        input:checked + .slider { background-color: var(--green-ios); }
+        input:checked + .slider.danger-switch { background-color: var(--red-ios); }
+        input:checked + .slider:before { transform: translateX(22px); }
+        .btn { width: 100%; padding: 18px; border-radius: 16px; border: none; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 16px; transition: all 0.3s var(--spring); margin-bottom: 12px; }
+        .btn-primary { background: var(--gold-gradient); color: #000; box-shadow: 0 8px 20px rgba(229, 192, 123, 0.2); }
+        .btn-primary:active { transform: scale(0.96); box-shadow: 0 4px 10px rgba(229, 192, 123, 0.3); }
+        .btn-danger { background: rgba(255, 69, 58, 0.1); color: var(--red-ios); border: 1px solid rgba(255,69,58,0.3); }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;}
+        .stat-box { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 22px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(255,255,255,0.03); }
+        .stat-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #fff; background: var(--ios-border); }
+        .stat-label { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;}
+        .stat-val { font-size: 26px; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px;}
+        .log-item { background: rgba(255,255,255,0.03); padding: 18px; border-radius: 20px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.02); position: relative; overflow: hidden; }
+        .log-item::before { content: ''; position: absolute; left: 0; top: 0; width: 4px; height: 100%; background: var(--gold-premium); border-radius: 4px 0 0 4px; }
+        .dock-container { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 420px; z-index: 1000; }
+        .dock { background: rgba(40, 40, 42, 0.75); backdrop-filter: blur(50px) saturate(200%); border: 1px solid rgba(255,255,255,0.15); border-radius: 35px; display: flex; justify-content: space-between; align-items: center; padding: 12px 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        .dock-item { color: var(--text-muted); display: flex; flex-direction: column; align-items: center; font-size: 10px; gap: 4px; cursor: pointer; font-weight: 500; transition: all 0.4s var(--spring); position: relative; width: 50px; }
+        .dock-item.active { color: var(--gold-premium); transform: translateY(-4px);}
+        .dock-item i { font-size: 22px; transition: 0.4s var(--spring);}
+        .dock-item.active i { transform: scale(1.1); filter: drop-shadow(0 2px 8px rgba(229, 192, 123, 0.4));}
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(40, 40, 42, 0.9); color: var(--text-main); padding: 16px 28px; border-radius: 100px; opacity: 0; z-index: 3000; font-weight: 500; box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1); font-size: 14px; backdrop-filter: blur(20px); transition: all 0.4s var(--spring); pointer-events: none;}
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+
+    <!-- 🚨 ZERO-BREACH SECURITY 🚨 -->
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey) || (e.ctrlKey && e.keyCode == 85)) return false; }
+        setInterval(function() { var b=new Date().getTime(); debugger; var a=new Date().getTime(); if(a-b>100){ document.body.innerHTML="<h1 style='color:red; text-align:center; margin-top:30vh;'>CONNECTION TERMINATED.</h1>"; window.location.replace("about:blank"); } }, 1000);
+    </script>
+</head>
+<body>
+    <div id="toast">Message</div>
+
+    <div class="container">
+        <!-- 🔐 LOGIN SCREEN -->
+        <div id="loginScreen" class="screen active" style="margin-top: 15vh;">
+            <div style="text-align: center; margin-bottom: 40px;">
+                <i class="fab fa-apple" style="font-size: 60px; color: var(--text-main); margin-bottom: 25px;"></i>
+                <h1 style="color: #fff; letter-spacing: 2px; font-weight: 800; font-size: 28px;">OWNER <span>PRO</span></h1>
+            </div>
+            <div class="ios-card">
+                <div class="section-tag" style="text-align:center;">Secure Authentication</div>
+                <input type="password" id="ownerPass" placeholder="Master Password" style="text-align: center; font-weight: 600; font-size: 18px; letter-spacing: 4px;">
+                <button class="btn btn-primary" style="margin-top: 10px;" onclick="handleOwnerLogin()">Unlock Panel</button>
+            </div>
+        </div>
+
+        <!-- 🌍 1. MASTER DASHBOARD -->
+        <div id="dashboardScreen" class="screen">
+            <h1 class="god-title">System <span>Overview</span></h1>
+            
+            <div class="ios-card" style="background: linear-gradient(135deg, rgba(229,192,123,0.15) 0%, rgba(0,0,0,0.4) 100%);">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div class="section-tag" style="color:var(--text-main); opacity:0.8;">Total Economy</div>
+                        <div style="color:var(--gold-premium); font-weight:800; font-size:36px; letter-spacing:-1px;" id="totalSystemCoins">0 🪙</div>
+                    </div>
+                    <i class="fas fa-chart-pie" style="font-size: 40px; color: rgba(229,192,123,0.3);"></i>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-box"><div class="stat-icon" style="color: var(--blue-ios);"><i class="fas fa-users"></i></div><div class="stat-label">Citizens</div><div class="stat-val" id="totalUsersCount">0</div></div>
+                <div class="stat-box"><div class="stat-icon" style="color: var(--green-ios);"><i class="fas fa-key"></i></div><div class="stat-label">Keys Used</div><div class="stat-val" id="totalExtractedKeys">0</div></div>
+                <div class="stat-box"><div class="stat-icon" style="color: #BF5AF2;"><i class="fas fa-layer-group"></i></div><div class="stat-label">Stock Ready</div><div class="stat-val" id="availableStock">0</div></div>
+                <div class="stat-box"><div class="stat-icon" style="color: var(--gold-premium);"><i class="fas fa-briefcase"></i></div><div class="stat-label">Resellers</div><div class="stat-val" id="resellerCount">0</div></div>
+            </div>
+        </div>
+
+        <!-- 👥 2. DIRECT USER CONTROL -->
+        <div id="usersScreen" class="screen">
+            <h1 class="god-title">Manage <span>Citizens</span></h1>
+            <div class="ios-card">
+                <input type="text" id="ownerUserSearch" placeholder="Search Username..." oninput="renderGodUsers()">
+                <div id="godUserListContainer" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;">
+                    <p style="color:var(--text-muted); font-size:13px; text-align:center;">Syncing Database...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. COMMAND CENTER -->
+        <div id="cmdScreen" class="screen">
+            <h1 class="god-title">Control <span>Center</span></h1>
+
+            <!-- 🔥 FLASH SALE PROTOCOL 🔥 -->
+            <div class="ios-card" style="border-color: rgba(255, 159, 10, 0.4); background: rgba(255, 159, 10, 0.05);">
+                <div class="section-tag" style="color: #ff9f0a;"><i class="fas fa-bolt"></i> Flash Sale Engine</div>
+                <div class="switch-container">
+                    <div style="font-size: 14px; font-weight: 500;">Activate Global Flash Sale</div>
+                    <label class="switch"><input type="checkbox" id="flashToggle"><span class="slider"></span></label>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="flashDiscount" placeholder="Discount % (e.g. 20)">
+                    <input type="number" id="flashHours" placeholder="Hours (e.g. 2)">
+                </div>
+                <button class="btn btn-primary" onclick="deployFlashSale()">Deploy Flash Sale</button>
+            </div>
+            
+            <!-- BANNERS MANAGER -->
+            <div class="ios-card">
+                <div class="section-tag"><i class="fas fa-image"></i> Dynamic Banners</div>
+                <input type="text" id="bannerLink" placeholder="Paste Image URL (https://...)">
+                <button class="btn" style="background: rgba(255,255,255,0.1); color: var(--text-main);" onclick="addBanner()">Add to User Panel</button>
+                <div class="section-tag" style="margin-top: 15px;">Active Banners</div>
+                <div id="bannersList"></div>
+            </div>
+
+            <!-- MAINTENANCE KILL SWITCH -->
+            <div class="ios-card" style="border-color: rgba(255, 69, 58, 0.3); background: rgba(255, 69, 58, 0.05);">
+                <div class="section-tag" style="color: var(--red-ios);"><i class="fas fa-exclamation-triangle"></i> Emergency Protocols</div>
+                <div class="switch-container">
+                    <div style="font-size: 15px; font-weight: 500;">Maintenance Mode</div>
+                    <label class="switch"><input type="checkbox" id="maintToggle" onchange="toggleMaintenance()"><span class="slider danger-switch"></span></label>
+                </div>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Blocks all users from accessing the app immediately.</p>
+                <button class="btn btn-danger" onclick="purgeAllKeys()"><i class="fas fa-radiation"></i> Wipe All Keys Database</button>
+            </div>
+
+            <!-- APP UPDATE PROTOCOL -->
+            <div class="ios-card">
+                <div class="section-tag" style="color: var(--blue-ios);"><i class="fas fa-rocket"></i> App Force Update</div>
+                <div class="switch-container">
+                    <div style="font-size: 14px; font-weight: 500;">Mandatory Update Active</div>
+                    <label class="switch"><input type="checkbox" id="forceUpdateToggle"><span class="slider"></span></label>
+                </div>
+                <input type="text" id="appVer" placeholder="Version (e.g. 2.0)">
+                <input type="text" id="appLink" placeholder="APK Download Link">
+                <textarea id="appMsg" rows="2" placeholder="Update Release Notes..."></textarea>
+                <button class="btn" style="background: rgba(10, 132, 255, 0.15); color: var(--blue-ios);" onclick="deployAppUpdate()">Deploy Update Protocol</button>
+            </div>
+
+            <!-- GLOBAL BROADCAST -->
+            <div class="ios-card">
+                <div class="section-tag" style="color: var(--green-ios);"><i class="fas fa-bullhorn"></i> Global Notice</div>
+                <textarea id="broadcastMsg" rows="2" placeholder="Enter notification message..."></textarea>
+                <button class="btn" style="background: rgba(50, 215, 75, 0.15); color: var(--green-ios);" onclick="sendBroadcast()">Broadcast to All Users</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING DOCK (CLASSIC iOS) -->
+    <div class="dock-container" id="bottomNav" style="display: none;">
+        <div class="dock">
+            <div class="dock-item active" onclick="navTo('dashboardScreen', this)"><i class="fas fa-chart-pie"></i><span>Nexus</span></div>
+            <div class="dock-item" onclick="navTo('usersScreen', this)"><i class="fas fa-users"></i><span>Citizens</span></div>
+            <div class="dock-item" onclick="navTo('cmdScreen', this)"><i class="fas fa-sliders-h"></i><span>Control</span></div>
+            <div class="dock-item" onclick="location.reload()"><i class="fas fa-lock" style="color: var(--text-muted);"></i><span>Lock</span></div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyD34fH-sJcW9qfa4szEyhM776lRPKnhU2w", authDomain: "mojo-ff860.firebaseapp.com", databaseURL: "https://mojo-ff860-default-rtdb.firebaseio.com", projectId: "mojo-ff860", storageBucket: "mojo-ff860.firebasestorage.app", messagingSenderId: "125008924439", appId: "1:125008924439:web:de30d3a07109827e093152", measurementId: "G-F492WMV8KK" };
+        firebase.initializeApp(firebaseConfig); const database = firebase.database();
+        
+        let allUsers = {}; let allStock = {}; let banners = {};
+
+        function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000); }
+        function navTo(screenId, el) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); setTimeout(() => { document.getElementById(screenId).classList.add('active'); }, 50); document.querySelectorAll('.dock-item').forEach(t => t.classList.remove('active')); if(el) el.classList.add('active'); }
+
+        async function handleOwnerLogin() {
+            let pass = document.getElementById('ownerPass').value;
+            if(pass === 'OGGY@977') {
+                document.getElementById('loginScreen').classList.remove('active'); document.getElementById('bottomNav').style.display = 'block';
+                navTo('dashboardScreen', document.querySelectorAll('.dock-item')[0]); showToast("Authentication Successful."); initGodListeners();
+            } else { showToast("Access Denied."); }
+        }
+
+        function initGodListeners() {
+            database.ref('users').on('value', snap => { allUsers = snap.val() || {}; updateMasterStats(); renderGodUsers(); });
+            database.ref('stock').on('value', snap => { allStock = snap.val() || {}; let availCount = 0; for(let k in allStock) { if(allStock[k].status === 'available') availCount++; } document.getElementById('availableStock').innerText = availCount; });
+            database.ref('settings').on('value', snap => {
+                if(snap.exists()) {
+                    let d = snap.val();
+                    if(d.appConfig) { document.getElementById('appVer').value = d.appConfig.version || ''; document.getElementById('appLink').value = d.appConfig.link || ''; document.getElementById('appMsg').value = d.appConfig.message || ''; document.getElementById('forceUpdateToggle').checked = d.appConfig.forceUpdate || false; }
+                    if(d.broadcast) document.getElementById('broadcastMsg').value = d.broadcast.message || '';
+                    if(d.maintenance !== undefined) document.getElementById('maintToggle').checked = d.maintenance;
+                    if(d.flashSale) { document.getElementById('flashToggle').checked = d.flashSale.active || false; document.getElementById('flashDiscount').value = d.flashSale.discount || ''; }
+                    if(d.banners) { banners = d.banners; renderBanners(); } else { banners = {}; renderBanners(); }
+                }
+            });
+        }
+
+        function updateMasterStats() {
+            let totalCoins = 0; let totalUsers = 0; let totalResellers = 0; let totalKeysTaken = 0;
+            for(let uid in allUsers) {
+                totalUsers++; let user = allUsers[uid]; totalCoins += (user.balance || 0);
+                if(user.role === 'reseller') totalResellers++;
+                if(user.keys) { totalKeysTaken += Object.keys(user.keys).length; }
+            }
+            document.getElementById('totalSystemCoins').innerText = totalCoins + " 🪙"; document.getElementById('totalUsersCount').innerText = totalUsers; document.getElementById('resellerCount').innerText = totalResellers; document.getElementById('totalExtractedKeys').innerText = totalKeysTaken;
+        }
+
+        // BANNERS MANAGER
+        async function addBanner() {
+            let link = document.getElementById('bannerLink').value; if(!link) return;
+            await database.ref('settings/banners').push(link); document.getElementById('bannerLink').value = ''; showToast("Banner Uploaded!");
+        }
+        function renderBanners() {
+            let b = document.getElementById('bannersList'); b.innerHTML='';
+            if(Object.keys(banners).length === 0) b.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>No Banners active.</p>";
+            for(let id in banners) {
+                b.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:rgba(255,255,255,0.03); padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.05);">
+                    <img src="${banners[id]}" style="width:70px; height:40px; border-radius:8px; object-fit:cover;">
+                    <button class="btn" style="background:var(--red-ios); color:#fff; width:auto; padding:8px 12px; margin-bottom:0; border-radius:10px;" onclick="delBanner('${id}')"><i class="fas fa-trash"></i></button>
+                </div>`;
+            }
+        }
+        async function delBanner(id) { await database.ref('settings/banners/'+id).remove(); }
+
+        // USERS CONTROL
+        function renderGodUsers() {
+            const q = document.getElementById('ownerUserSearch').value.toLowerCase(); const container = document.getElementById('godUserListContainer'); container.innerHTML = ""; let uCount = 0;
+            for(let uKey in allUsers) {
+                let user = allUsers[uKey]; let uName = user.username || uKey; let uPass = user.password || 'N/A';
+                if(uName.toLowerCase().includes(q)) {
+                    uCount++; 
+                    let roleColor = user.role === 'admin' ? 'var(--red-ios)' : user.role === 'reseller' ? '#BF5AF2' : 'var(--gold-premium)';
+                    
+                    container.innerHTML += `
+                        <div class="log-item" style="border-left-color: ${roleColor};">
+                            <div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-size: 16px; font-weight: 600; color: #fff;">${uName}</div><div style="font-weight: 700; color: var(--green-ios); font-size: 16px;">${user.balance || 0} 🪙</div></div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 8px;"><span style="font-size: 11px; font-weight: 600; color: ${roleColor};">[${(user.role || 'user').toUpperCase()}]</span><span style="font-size: 12px; color: var(--text-muted); font-family: monospace;">Pass: ${uPass}</span></div>
+                            <div style="display:flex; gap:8px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+                                <button class="btn" style="flex:1; padding:12px; font-size:13px; background:rgba(255,255,255,0.05); color:var(--text-main); margin-bottom:0; border-radius:10px;" onclick="godEditBalance('${uKey}')">Edit Bal</button>
+                                <button class="btn" style="flex:1; padding:12px; font-size:13px; background:rgba(255,255,255,0.05); color:var(--text-main); margin-bottom:0; border-radius:10px;" onclick="godEditPass('${uKey}')">Edit Pass</button>
+                                <button class="btn" style="flex:0.4; padding:12px; font-size:13px; background:rgba(255,69,58,0.15); color:var(--red-ios); margin-bottom:0; border-radius:10px;" onclick="godDeleteUser('${uKey}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>`;
+                }
+            }
+            if(uCount === 0) container.innerHTML = "<p style='color:var(--text-muted); font-size:13px; text-align:center;'>No citizens match.</p>";
+        }
+
+        async function godEditBalance(uKey) { let user = allUsers[uKey]; let newVal = prompt(`Set exact balance for ${user.username || uKey}:`, user.balance || 0); if(newVal !== null && !isNaN(newVal)) { await database.ref(`users/${uKey}/balance`).set(parseInt(newVal)); showToast("Balance Updated."); } }
+        async function godEditPass(uKey) { let user = allUsers[uKey]; let newPass = prompt(`Set new pass for ${user.username || uKey}:`, user.password || ''); if(newPass !== null && newPass.trim() !== "") { await database.ref(`users/${uKey}/password`).set(newPass.trim()); showToast("Password Updated."); } }
+        async function godDeleteUser(uKey) { if(uKey === 'admin') return showToast("Cannot delete Master Admin!"); if(confirm("Erase this citizen completely?")) { await database.ref(`users/${uKey}`).remove(); showToast("Citizen Erased."); } }
+
+        // COMMANDS
+        async function deployFlashSale() {
+            let isActive = document.getElementById('flashToggle').checked;
+            if(!isActive) { await database.ref('settings/flashSale/active').set(false); return showToast("Flash Sale Terminated."); }
+            let disc = parseInt(document.getElementById('flashDiscount').value); let hrs = parseFloat(document.getElementById('flashHours').value);
+            if(!disc || !hrs) return showToast("Enter Discount % and Hours!");
+            let endTime = new Date().getTime() + (hrs * 60 * 60 * 1000);
+            await database.ref('settings/flashSale').set({ active: true, discount: disc, endTime: endTime });
+            showToast("Flash Sale Deployed!");
+        }
+
+        async function deployAppUpdate() { let ver = document.getElementById('appVer').value.trim(); let link = document.getElementById('appLink').value.trim(); let msg = document.getElementById('appMsg').value.trim(); let force = document.getElementById('forceUpdateToggle').checked; await database.ref('settings/appConfig').set({ version: ver, link: link, message: msg, forceUpdate: force }); showToast("Update Protocol Deployed!"); }
+        async function sendBroadcast() { let msg = document.getElementById('broadcastMsg').value.trim(); await database.ref('settings/broadcast').set({ message: msg }); showToast("Notice Transmitted!"); }
+        async function toggleMaintenance() { let state = document.getElementById('maintToggle').checked; await database.ref('settings/maintenance').set(state); showToast(state ? "Maintenance Mode ON" : "Maintenance Mode OFF"); }
+        async function purgeAllKeys() { if(confirm("WARNING: This deletes ALL keys extracted by ALL users forever. Proceed?")) { if(confirm("Are you 100% sure?")) { let updates = {}; for(let uid in allUsers) { if(allUsers[uid].keys) { updates[`users/${uid}/keys`] = null; } } await database.ref().update(updates); showToast("Global Vault Purged."); } } }
+    </script>
+</body>
+</html>
