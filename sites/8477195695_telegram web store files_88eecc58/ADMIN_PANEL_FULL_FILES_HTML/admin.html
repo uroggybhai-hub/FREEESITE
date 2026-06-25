@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Codeify Store - Admin Panel</title>
+    
+    <!-- CSS Dependencies -->
+    <link rel="stylesheet" href="admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="dark-theme">
+
+    <!-- App Loader -->
+    <div id="admin-loader" class="screen-loader flex-center flex-col">
+        <div class="spinner"></div>
+        <h3 class="text-gradient mt-2">Authenticating Admin...</h3>
+    </div>
+
+    <!-- MAIN ADMIN LAYOUT -->
+    <div class="admin-wrapper">
+        
+        <!-- SIDEBAR MENU -->
+        <aside class="sidebar glass" id="admin-sidebar">
+            <div class="sidebar-header flex-center flex-col">
+                <i class="fas fa-user-shield text-gradient" style="font-size: 2.5rem;"></i>
+                <h2 class="mt-1 text-gradient">Admin Panel</h2>
+                <div class="close-sidebar hidden-desktop" onclick="toggleSidebar()">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+
+            <ul class="sidebar-menu mt-2">
+                <li class="menu-item active" data-target="dashboard" onclick="switchAdminTab('dashboard')">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </li>
+                <li class="menu-item" data-target="users" onclick="switchAdminTab('users')">
+                    <i class="fas fa-users"></i> Manage Users
+                </li>
+                <!-- NEW ADD FILE PAGE BUTTON -->
+                <li class="menu-item" data-target="admin-add-file" onclick="switchAdminTab('admin-add-file')">
+                    <i class="fas fa-cloud-upload-alt"></i> Upload New File
+                </li>
+                <li class="menu-item" data-target="files" onclick="switchAdminTab('files')">
+                    <i class="fas fa-file-archive"></i> File Approvals
+                </li>
+                <li class="menu-item" data-target="banners" onclick="switchAdminTab('banners')">
+                    <i class="fas fa-ad"></i> Ad Banners
+                </li>
+                <li class="menu-item" data-target="tasks" onclick="switchAdminTab('tasks')">
+                    <i class="fas fa-tasks"></i> Daily Tasks
+                </li>
+                <li class="menu-item" data-target="messages" onclick="switchAdminTab('messages')">
+                    <i class="fas fa-headset"></i> User Messages
+                </li>
+                <li class="menu-item" data-target="broadcast" onclick="switchAdminTab('broadcast')">
+                    <i class="fas fa-bullhorn"></i> Broadcast
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <button class="btn-danger w-100 flex-center gap-1" onclick="window.location.href='user.html'">
+                    <i class="fas fa-sign-out-alt"></i> Exit to App
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            <header class="admin-header glass flex space-between items-center">
+                <div class="flex items-center gap-1">
+                    <button class="menu-toggle btn-glass flex-center hidden-desktop" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 id="page-title" class="text-white">Dashboard Overview</h2>
+                </div>
+                <div class="admin-profile flex items-center gap-1">
+                    <span class="text-sm text-muted hidden-mobile">Welcome, Admin</span>
+                    <img src="https://via.placeholder.com/40" class="rounded-circle border-primary" alt="Admin">
+                </div>
+            </header>
+
+            <div class="page-container">
+                
+                <!-- 1. DASHBOARD PAGE -->
+                <section id="dashboard" class="admin-content active">
+                    <div class="grid-4 gap-2 mt-1">
+                        <div class="stat-card glass flex-col flex-center text-center">
+                            <i class="fas fa-users text-primary mb-1 text-xl"></i>
+                            <h1 id="stat-users" class="text-gradient">0</h1>
+                            <p class="text-muted text-sm mt-1">Total Users</p>
+                        </div>
+                        <div class="stat-card glass flex-col flex-center text-center">
+                            <i class="fas fa-file-alt text-success mb-1 text-xl"></i>
+                            <h1 id="stat-files" class="text-gradient">0</h1>
+                            <p class="text-muted text-sm mt-1">Total Files</p>
+                        </div>
+                        <div class="stat-card glass flex-col flex-center text-center">
+                            <i class="fas fa-clock text-warning mb-1 text-xl"></i>
+                            <h1 id="stat-pending" class="text-gradient">0</h1>
+                            <p class="text-muted text-sm mt-1">Pending Files</p>
+                        </div>
+                        <div class="stat-card glass flex-col flex-center text-center">
+                            <i class="fas fa-ad text-danger mb-1 text-xl"></i>
+                            <h1 id="stat-banners" class="text-gradient">0</h1>
+                            <p class="text-muted text-sm mt-1">Active Banners</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. USERS PAGE -->
+                <section id="users" class="admin-content">
+                    <div class="glass p-1 mb-2 flex items-center gap-1">
+                        <i class="fas fa-search text-muted ml-1"></i>
+                        <input type="text" id="search-user" class="transparent-input w-100" placeholder="Search users by name..." onkeyup="searchUsers(this.value)">
+                    </div>
+                    <div id="admin-user-list" class="flex-col gap-1"></div>
+                </section>
+
+                <!-- 3. NEW: ADMIN ADD FILE PAGE -->
+                <section id="admin-add-file" class="admin-content">
+                    <div class="glass p-2 border-primary">
+                        <h3 class="mb-1 text-gradient"><i class="fas fa-upload"></i> Publish Global File</h3>
+                        <p class="text-sm text-muted mb-2">Files uploaded here are directly published to the store without pending state.</p>
+                        
+                        <div class="flex-col gap-1">
+                            <input type="text" id="admin-file-name" class="glass-input w-100" placeholder="File Name">
+                            <input type="text" id="admin-file-img" class="glass-input w-100" placeholder="Cover Image URL">
+                            <input type="text" id="admin-file-link" class="glass-input w-100" placeholder="Download / Drive Link">
+                            
+                            <div class="flex gap-1 items-center">
+                                <input type="number" id="admin-file-real" class="glass-input w-50" placeholder="Real Price" onkeyup="calcAdminDiscount()">
+                                <input type="number" id="admin-file-sell" class="glass-input w-50" placeholder="Sell Price" onkeyup="calcAdminDiscount()">
+                                <span id="admin-discount-badge" class="bg-success text-white px-1 rounded text-sm hidden" style="padding: 10px; font-weight:bold;">0% OFF</span>
+                            </div>
+
+                            <select id="admin-file-cat" class="glass-input w-100">
+                                <option value="" disabled selected>Select Category</option>
+                                <option value="HTML">HTML</option>
+                                <option value="App">App</option>
+                                <option value="Prompt">Prompt</option>
+                                <option value="SWB">SWB</option>
+                                <option value="Zip">Zip</option>
+                                <option value="Bot">Bot</option>
+                            </select>
+                            <textarea id="admin-file-desc" class="glass-input w-100" rows="4" placeholder="File Description..."></textarea>
+                            
+                            <button class="btn-gradient w-100 mt-2 p-2 text-lg shadow-lg" onclick="adminSubmitFile()">
+                                <i class="fas fa-check-circle"></i> Add & Publish File
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. FILES APPROVAL PAGE -->
+                <section id="files" class="admin-content">
+                    <div class="flex gap-1 mb-2">
+                        <button id="tab-req" class="btn-gradient w-50" onclick="toggleFileView('requests')">Pending Requests</button>
+                        <button id="tab-app" class="btn-glass w-50" onclick="toggleFileView('approved')">Approved Files</button>
+                    </div>
+                    <div id="admin-file-list" class="grid-2 gap-1 mt-1"></div>
+                </section>
+
+                <!-- 5. BANNERS PAGE -->
+                <section id="banners" class="admin-content">
+                    <div class="glass p-2 mb-2 border-primary">
+                        <h3 class="mb-1 text-gradient"><i class="fas fa-plus-circle"></i> Add Global Banner</h3>
+                        <div class="grid-2 gap-1">
+                            <input type="text" id="admin-ad-name" class="glass-input w-100" placeholder="Banner Name">
+                            <input type="text" id="admin-ad-link" class="glass-input w-100" placeholder="Redirect URL">
+                        </div>
+                        <input type="text" id="admin-ad-img" class="glass-input w-100 mt-1" placeholder="Image URL (2:1 Ratio)">
+                        <button class="btn-gradient w-100 mt-2 p-1" onclick="adminAddBanner()">Publish Banner</button>
+                    </div>
+                    <h3 class="mb-1 border-bottom pb-1">All Ad Banners</h3>
+                    <div id="admin-banner-list" class="grid-2 gap-1 mt-1"></div>
+                </section>
+
+                <!-- 6. TASKS PAGE -->
+                <section id="tasks" class="admin-content">
+                    <div class="glass p-2 mb-2 border-primary">
+                        <h3 class="mb-1 text-gradient"><i class="fas fa-plus-circle"></i> Add Custom Task</h3>
+                        <div class="flex gap-1 mt-1">
+                            <input type="text" id="task-name" class="glass-input w-100" placeholder="Task Name">
+                            <input type="number" id="task-reward" class="glass-input w-50" placeholder="Coins Reward">
+                        </div>
+                        <button class="btn-gradient w-100 mt-2 p-1" onclick="addTask()">Add Task to App</button>
+                    </div>
+                    <div id="admin-tasks-list" class="flex-col gap-1 mt-2"></div>
+                </section>
+
+                <!-- 7. MESSAGES PAGE -->
+                <section id="messages" class="admin-content">
+                    <div class="glass p-1 mb-2 text-center text-muted">Select a user to reply to their support messages.</div>
+                    <div id="admin-chat-users" class="flex-col gap-1"></div>
+                </section>
+
+                <!-- 8. BROADCAST PAGE (Updated with Image input) -->
+                <section id="broadcast" class="admin-content">
+                    <div class="glass p-2 text-center relative overflow-hidden border-primary">
+                        <div class="bg-glow"></div>
+                        <i class="fas fa-satellite-dish text-primary mb-1" style="font-size: 3rem;"></i>
+                        <h2 class="text-gradient">Push Notification</h2>
+                        <p class="text-sm text-muted mt-1 mb-2">Send an instant notification with Image to all users.</p>
+                        
+                        <input type="text" id="notif-title" class="glass-input w-100 mb-1 text-center" placeholder="Notification Title">
+                        
+                        <!-- NEW IMAGE FIELD -->
+                        <input type="text" id="notif-img" class="glass-input w-100 mb-1 text-center" placeholder="Image URL (Optional)">
+                        
+                        <textarea id="notif-desc" class="glass-input w-100 mb-1 text-center" rows="4" placeholder="Type your message here..."></textarea>
+                        
+                        <button class="btn-gradient w-100 p-2 text-lg mt-1 shadow-lg" onclick="sendNotification()">
+                            <i class="fas fa-paper-plane"></i> Send Broadcast
+                        </button>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Chat Modal -->
+    <div id="adminChatModal" class="modal">
+        <div class="modal-content glass fade-in">
+            <span class="close" onclick="closeModal('adminChatModal')">&times;</span>
+            <div class="flex items-center gap-1 border-bottom pb-1 mb-1">
+                <i class="fas fa-headset text-primary text-xl"></i>
+                <h2 id="admin-chat-title" class="text-white">Chat</h2>
+            </div>
+            <div class="chat-container">
+                <div class="chat-messages" id="admin-chat-box"></div>
+                <div class="chat-input-area mt-1">
+                    <input type="text" id="admin-chat-input" class="glass-input w-100" placeholder="Type admin reply...">
+                    <button class="btn-gradient" onclick="adminSendMessage()"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast glass hidden flex items-center justify-center gap-1">
+        <i class="fas fa-check-circle text-success"></i> <span id="toast-msg">Success</span>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
