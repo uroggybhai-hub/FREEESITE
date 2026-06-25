@@ -1,0 +1,155 @@
+/* =========================================================
+   ADMIN PANEL - STYLESHEET (admin.css)
+   Features: Sidebar Drawer, Tab Switching, Grid Layouts
+========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* --- CSS VARIABLES --- */
+:root {
+    --bg-dark: #0f172a; 
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    
+    --primary: #6366f1; 
+    --secondary: #a855f7; 
+    --accent: #ec4899; 
+    
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+}
+
+/* --- RESET & BASICS --- */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+body { background: var(--bg-dark); color: var(--text-main); overflow-x: hidden; min-height: 100vh; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+/* --- UTILITIES --- */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-center { display: flex; justify-content: center; align-items: center; }
+.space-between { justify-content: space-between; }
+.items-center { align-items: center; }
+.gap-1 { gap: 10px; } .gap-2 { gap: 20px; }
+.w-100 { width: 100%; } .w-50 { width: 50%; }
+.mt-1 { margin-top: 10px; } .mt-2 { margin-top: 20px; } .mt-4 { margin-top: 40px; }
+.mb-1 { margin-bottom: 10px; } .mb-2 { margin-bottom: 20px; }
+.p-1 { padding: 10px; } .p-2 { padding: 20px; }
+.text-center { text-align: center; }
+.text-muted { color: var(--text-muted); }
+.text-primary { color: var(--primary); }
+.text-success { color: var(--success); }
+.text-warning { color: var(--warning); }
+.text-danger { color: var(--danger); }
+.text-white { color: #fff; }
+.text-sm { font-size: 0.85rem; } .text-xl { font-size: 1.5rem; }
+.border-bottom { border-bottom: 1px solid var(--glass-border); }
+.border-primary { border: 1px solid rgba(99, 102, 241, 0.3); }
+.rounded-circle { border-radius: 50%; }
+.hidden { display: none !important; }
+.relative { position: relative; }
+.overflow-hidden { overflow: hidden; }
+
+/* --- GRADIENTS & GLASSMORPHISM --- */
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700;
+}
+.glass {
+    background: var(--glass-bg); backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: var(--glass-shadow);
+}
+.glass-input {
+    background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: var(--text-main);
+    padding: 12px 15px; border-radius: 12px; outline: none; transition: 0.3s;
+}
+.glass-input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(99, 102, 241, 0.3); }
+.transparent-input { background: transparent; border: none; color: #fff; outline: none; font-size: 1rem; }
+
+/* Buttons */
+.btn-gradient { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; border: none; border-radius: 10px; padding: 10px 15px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+.btn-gradient:active { transform: scale(0.95); }
+.btn-glass { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--glass-border); border-radius: 10px; padding: 10px 15px; cursor: pointer; transition: 0.3s; }
+.btn-success { background: var(--success); color: #fff; border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-weight:bold; }
+.btn-danger { background: var(--danger); color: #fff; border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-weight:bold; }
+.btn-warning { background: var(--warning); color: #000; border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-weight:bold; }
+
+/* --- MAIN ADMIN LAYOUT --- */
+.admin-wrapper { display: flex; height: 100vh; overflow: hidden; }
+
+/* --- SIDEBAR MENU --- */
+.sidebar {
+    width: 260px; height: 100vh; display: flex; flex-direction: column;
+    border-radius: 0 20px 20px 0; z-index: 1000; transition: 0.3s;
+}
+.sidebar-header { padding: 30px 20px 20px 20px; border-bottom: 1px solid var(--glass-border); position: relative; }
+.sidebar-menu { list-style: none; flex: 1; padding: 20px 15px; overflow-y: auto; }
+.menu-item {
+    padding: 12px 20px; margin-bottom: 10px; border-radius: 12px;
+    font-size: 1rem; cursor: pointer; transition: 0.3s;
+    display: flex; align-items: center; gap: 15px; color: var(--text-muted);
+}
+.menu-item i { font-size: 1.2rem; width: 25px; }
+.menu-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.menu-item.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; font-weight: 600; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
+.sidebar-footer { padding: 20px; border-top: 1px solid var(--glass-border); }
+.close-sidebar { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+
+/* --- MAIN CONTENT & HEADER --- */
+.main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.admin-header { height: 70px; padding: 0 20px; border-radius: 0 0 20px 20px; border-top: none; }
+.page-container { flex: 1; overflow-y: auto; padding: 20px; }
+
+/* =========================================================================
+   CORE FIX: TAB SWITCHING LOGIC (Never show all pages at once)
+========================================================================= */
+.admin-content { display: none; opacity: 0; transform: translateY(15px); }
+.admin-content.active { display: block; animation: slideIn 0.4s forwards cubic-bezier(0.16, 1, 0.3, 1); }
+
+@keyframes slideIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- GRIDS & DATA LISTS --- */
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+.list-item { padding: 15px; border-radius: 16px; margin-bottom: 10px; transition: 0.3s; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); }
+.list-item:hover { background: rgba(255,255,255,0.06); }
+
+/* --- CHAT MODAL --- */
+.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px); justify-content: center; align-items: center; padding: 15px; }
+.modal-content { width: 100%; max-width: 500px; padding: 20px; position: relative; max-height: 90vh; }
+.close { position: absolute; right: 20px; top: 20px; font-size: 2rem; cursor: pointer; color: var(--text-muted); }
+.chat-container { height: 60vh; display: flex; flex-direction: column; }
+.chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px 0; }
+.msg-bubble { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 0.95rem; }
+.msg-self { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 2px; }
+.msg-other { align-self: flex-start; background: rgba(255,255,255,0.1); border-bottom-left-radius: 2px; }
+.chat-input-area { display: flex; gap: 10px; }
+.chat-input-area button { border-radius: 50%; width: 50px; height: 45px; }
+
+/* --- TOAST & LOADER --- */
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 12px 25px; border-radius: 30px; z-index: 3000; transition: 0.4s; opacity: 0; visibility: hidden; background: #000; border: 1px solid var(--primary); font-weight: 500; }
+.toast:not(.hidden) { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; }
+
+.screen-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 9999; }
+.spinner { width: 60px; height: 60px; border: 5px solid rgba(255,255,255,0.1); border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* --- RESPONSIVE DESIGN --- */
+@media (max-width: 768px) {
+    .hidden-mobile { display: none !important; }
+    .sidebar { position: fixed; left: -300px; box-shadow: 10px 0 30px rgba(0,0,0,0.8); }
+    .sidebar.open { left: 0; }
+}
+@media (min-width: 769px) {
+    .hidden-desktop { display: none !important; }
+}
