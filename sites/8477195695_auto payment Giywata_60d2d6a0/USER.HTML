@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Codeify Auto Payment | User Portal</title>
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* =========================================================
+           1. CSS VARIABLES & BASE STYLES
+           ========================================================= */
+        :root {
+            --bg-color: #0a0a0f;
+            --neon-green: #39ff14;
+            --neon-glow: rgba(57, 255, 20, 0.4);
+            --neon-dim: rgba(57, 255, 20, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #8a8a93;
+            --danger: #ff4757;
+            --warning: #ffa502;
+            --success: #2ed573;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Ambient Background Glows */
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.5;
+            animation: pulseGlow 8s infinite alternate;
+        }
+        .glow-1 { top: -100px; left: -100px; width: 300px; height: 300px; background: rgba(57, 255, 20, 0.15); }
+        .glow-2 { bottom: -150px; right: -50px; width: 400px; height: 400px; background: rgba(0, 150, 255, 0.1); }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1); opacity: 0.3; }
+            100% { transform: scale(1.2); opacity: 0.6; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-green); }
+
+        /* =========================================================
+           2. UTILITIES & GLASSMORPHISM
+           ========================================================= */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .container { padding: 20px; max-width: 600px; margin: 0 auto; padding-bottom: 90px; }
+        .hidden { display: none !important; }
+        .text-neon { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-glow); }
+        .text-muted { color: var(--text-muted); font-size: 0.85rem; }
+        .flex-row { display: flex; align-items: center; justify-content: space-between; }
+        .flex-center { display: flex; align-items: center; justify-content: center; }
+        
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .badge-success { background: rgba(46, 213, 115, 0.15); color: var(--success); border: 1px solid var(--success); }
+        .badge-pending { background: rgba(255, 165, 2, 0.15); color: var(--warning); border: 1px solid var(--warning); }
+        .badge-danger { background: rgba(255, 71, 87, 0.15); color: var(--danger); border: 1px solid var(--danger); }
+
+        /* =========================================================
+           3. TYPOGRAPHY & FORMS
+           ========================================================= */
+        h1, h2, h3, h4 { font-weight: 600; margin-bottom: 15px; }
+        h2 { font-size: 1.5rem; }
+        
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.1rem; transition: var(--transition-speed); }
+        
+        input, select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 16px 16px 16px 50px;
+            border-radius: 14px;
+            font-size: 1rem;
+            outline: none;
+            transition: all var(--transition-speed);
+        }
+        select { padding-left: 20px; appearance: none; }
+        
+        input:focus, select:focus {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 15px var(--neon-dim);
+            background: rgba(0, 0, 0, 0.6);
+        }
+        input:focus + i { color: var(--neon-green); }
+
+        /* Custom Floating Button */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: transparent;
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn:hover, .btn.btn-solid {
+            background: var(--neon-green);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-glow);
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-small { padding: 8px 16px; font-size: 0.85rem; border-radius: 10px; width: auto; }
+        .btn-danger { border-color: var(--danger); color: var(--danger); }
+        .btn-danger:hover { background: var(--danger); color: #fff; box-shadow: 0 0 20px rgba(255,71,87,0.4); }
+
+        /* =========================================================
+           4. TOP APP BAR & SIDEBAR
+           ========================================================= */
+        .top-app-bar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .menu-btn {
+            background: none; border: none; color: var(--text-main);
+            font-size: 1.5rem; cursor: pointer; transition: 0.2s;
+        }
+        .menu-btn:hover { color: var(--neon-green); }
+
+        .profile-chip {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--glass-bg); padding: 5px 15px 5px 5px;
+            border-radius: 30px; border: 1px solid var(--glass-border);
+            cursor: pointer; transition: 0.3s;
+        }
+        .profile-chip:hover { border-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-dim); }
+        .profile-chip img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--neon-green); }
+        .profile-chip span { font-weight: 600; font-size: 0.9rem; }
+
+        /* Slide-out Sidebar Drawer */
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+            z-index: 2000; opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+        .sidebar {
+            position: fixed; top: 0; left: -320px; width: 280px; height: 100%;
+            background: rgba(15, 15, 20, 0.95); backdrop-filter: blur(25px);
+            border-right: 1px solid var(--glass-border);
+            z-index: 2001; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column; box-shadow: 5px 0 25px rgba(0,0,0,0.5);
+        }
+        .sidebar.active { left: 0; }
+
+        .sidebar-header {
+            padding: 30px 20px; text-align: center; border-bottom: 1px solid var(--glass-border);
+            background: linear-gradient(180deg, var(--neon-dim) 0%, transparent 100%);
+        }
+        .sidebar-header .avatar {
+            width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 15px;
+            border: 3px solid var(--neon-green); box-shadow: 0 0 15px var(--neon-glow);
+            background: #222; display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; color: var(--neon-green);
+        }
+        .sidebar-header h3 { margin-bottom: 5px; font-size: 1.2rem; }
+        .sidebar-header p { color: var(--text-muted); font-size: 0.85rem; }
+
+        .sidebar-menu { flex: 1; padding: 20px 0; overflow-y: auto; }
+        .sidebar-item {
+            padding: 15px 25px; display: flex; align-items: center; gap: 15px;
+            color: var(--text-main); text-decoration: none; font-size: 1.05rem;
+            transition: 0.3s; cursor: pointer; border-left: 4px solid transparent;
+        }
+        .sidebar-item i { font-size: 1.2rem; width: 25px; text-align: center; color: var(--text-muted); }
+        .sidebar-item:hover, .sidebar-item.active {
+            background: var(--glass-bg); border-left-color: var(--neon-green); color: var(--neon-green);
+        }
+        .sidebar-item:hover i, .sidebar-item.active i { color: var(--neon-green); }
+
+        .sidebar-footer { padding: 20px; border-top: 1px solid var(--glass-border); }
+
+        /* =========================================================
+           5. BOTTOM NAVIGATION (ALL PAGES INCLUDED)
+           ========================================================= */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(10, 10, 15, 0.9); backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; justify-content: space-around; padding: 10px 0 15px;
+            z-index: 1000; padding-bottom: calc(15px + env(safe-area-inset-bottom));
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            color: var(--text-muted); cursor: pointer; transition: 0.3s;
+            position: relative; width: 20%; /* 5 items fit perfectly */
+        }
+        .nav-item i { font-size: 1.4rem; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .nav-item span { font-size: 0.7rem; font-weight: 500; }
+        
+        .nav-item.active { color: var(--neon-green); }
+        .nav-item.active i { transform: translateY(-5px) scale(1.1); text-shadow: 0 0 15px var(--neon-glow); }
+        .nav-item.active::after {
+            content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+            width: 6px; height: 6px; border-radius: 50%; background: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+
+        /* =========================================================
+           6. PAGE TRANSITIONS & ANIMATIONS
+           ========================================================= */
+        .page-section {
+            display: none;
+            animation: fadeInScale 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+        }
+        .page-section.active-page { display: block; }
+
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: translateY(20px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Loading Skeletons */
+        .skeleton {
+            background: linear-gradient(90deg, var(--glass-bg) 25%, rgba(255,255,255,0.08) 50%, var(--glass-bg) 75%);
+            background-size: 400% 100%;
+            animation: skeletonLoading 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes skeletonLoading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* =========================================================
+           7. DASHBOARD & SPECIFIC UI COMPONENTS
+           ========================================================= */
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card {
+            padding: 20px; text-align: left; display: flex; flex-direction: column; gap: 8px;
+            position: relative; overflow: hidden;
+        }
+        .stat-card::before {
+            content: ''; position: absolute; top: -20px; right: -20px; width: 60px; height: 60px;
+            background: var(--neon-dim); border-radius: 50%; filter: blur(15px);
+        }
+        .stat-card i { position: absolute; right: 15px; top: 15px; font-size: 1.5rem; color: var(--glass-border); }
+        .stat-card span.label { color: var(--text-muted); font-size: 0.85rem; font-weight: 500; }
+        .stat-card span.value { font-size: 1.6rem; font-weight: 700; color: var(--text-main); }
+        .stat-card span.value.neon-val { color: var(--neon-green); }
+
+        /* Lists & Items */
+        .list-card {
+            padding: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px;
+            border-left: 3px solid transparent; transition: 0.3s; cursor: pointer;
+        }
+        .list-card:hover { transform: translateX(5px); background: rgba(255,255,255,0.06); }
+        .list-card.success-border { border-left-color: var(--success); }
+        .list-card.pending-border { border-left-color: var(--warning); }
+        
+        .list-header { display: flex; justify-content: space-between; align-items: center; }
+        .list-header .amount { font-size: 1.2rem; font-weight: 700; }
+        .list-details { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); }
+
+        /* Chat UI (Telegram Clone) */
+        .chat-wrapper { height: calc(100vh - 200px); display: flex; flex-direction: column; }
+        .chat-box { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 12px; }
+        
+        .chat-bubble {
+            max-width: 80%; padding: 12px 16px; border-radius: 18px;
+            font-size: 0.95rem; line-height: 1.4; position: relative;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            word-wrap: break-word;
+        }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+
+        .chat-recv {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            align-self: flex-start; border-bottom-left-radius: 4px;
+        }
+        .chat-sent {
+            background: rgba(57, 255, 20, 0.15); border: 1px solid var(--neon-dim);
+            align-self: flex-end; border-bottom-right-radius: 4px; color: var(--neon-green);
+        }
+        .chat-time { display: block; font-size: 0.65rem; color: var(--text-muted); margin-top: 5px; text-align: right; }
+
+        .chat-input-area {
+            display: flex; gap: 10px; padding: 15px 0 0 0; border-top: 1px solid var(--glass-border);
+        }
+        .chat-input-area input { margin-bottom: 0; border-radius: 30px; padding-left: 20px; }
+        .chat-btn {
+            width: 50px; height: 50px; border-radius: 50%; background: var(--neon-green);
+            color: #000; display: flex; align-items: center; justify-content: center;
+            border: none; font-size: 1.2rem; cursor: pointer; transition: 0.3s;
+        }
+        .chat-btn:hover { box-shadow: 0 0 15px var(--neon-glow); transform: rotate(-10deg); }
+
+        /* Premium Pricing Tables */
+        .pricing-card {
+            text-align: center; padding: 30px 20px; position: relative; overflow: hidden; margin-bottom: 20px;
+        }
+        .pricing-card.popular { border: 2px solid var(--neon-green); box-shadow: 0 0 20px var(--neon-dim); }
+        .popular-badge {
+            position: absolute; top: 15px; right: -30px; background: var(--neon-green); color: #000;
+            padding: 5px 30px; transform: rotate(45deg); font-size: 0.75rem; font-weight: bold;
+        }
+        .price { font-size: 2.5rem; font-weight: 700; color: var(--neon-green); margin: 15px 0; }
+        .price span { font-size: 1rem; color: var(--text-muted); font-weight: normal; }
+        .features-list { list-style: none; margin: 20px 0; text-align: left; }
+        .features-list li { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+        .features-list i { color: var(--neon-green); }
+
+        /* =========================================================
+           8. CUSTOM ALERTS (TOASTS)
+           ========================================================= */
+        #toast-container {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: column; gap: 10px; z-index: 9999; pointer-events: none;
+        }
+        .toast {
+            background: rgba(20, 20, 25, 0.95); backdrop-filter: blur(10px);
+            border: 1px solid var(--neon-green); border-left: 5px solid var(--neon-green);
+            color: #fff; padding: 12px 20px; border-radius: 10px; font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; align-items: center; gap: 12px; min-width: 280px;
+        }
+        .toast.error { border-color: var(--danger); border-left-color: var(--danger); }
+        .toast i { font-size: 1.2rem; }
+        .toast.success i { color: var(--neon-green); }
+        .toast.error i { color: var(--danger); }
+
+        @keyframes slideDown { 0% { opacity: 0; transform: translateY(-50px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-20px); } }
+
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Glowing Backgrounds -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <!-- Custom Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- =========================================================
+         AUTH SECTION (LOGIN / SIGNUP)
+         ========================================================= -->
+    <div id="auth-view" class="container page-section active-page">
+        <div style="text-align: center; margin: 40px 0 30px;">
+            <div class="sidebar-header" style="background: none; border: none; padding: 0;">
+                <div class="avatar" style="width: 70px; height: 70px; font-size: 2rem;"><i class="fa-solid fa-bolt"></i></div>
+            </div>
+            <h1 class="text-neon" style="font-size: 2rem; margin-bottom: 5px;">Codeify Pay</h1>
+            <p class="text-muted">High-Speed UPI Payment Gateway</p>
+        </div>
+
+        <!-- Login Form -->
+        <div id="form-login" class="glass-panel" style="padding: 30px 20px;">
+            <h2>Welcome Back</h2>
+            <p class="text-muted" style="margin-bottom: 25px;">Enter your credentials to access your dashboard.</p>
+            
+            <div class="input-group">
+                <input type="email" id="log-email" placeholder="Email Address">
+                <i class="fa-solid fa-envelope"></i>
+            </div>
+            <div class="input-group">
+                <input type="password" id="log-pass" placeholder="Password">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            
+            <button class="btn btn-solid" onclick="handleLogin()" style="margin-top: 10px;">
+                <i class="fa-solid fa-right-to-bracket"></i> Secure Login
+            </button>
+            
+            <p style="text-align: center; margin-top: 25px; font-size: 0.9rem;">
+                New to Codeify? <span class="text-neon" style="cursor: pointer; font-weight: bold;" onclick="toggleAuthForms()">Create Account</span>
+            </p>
+        </div>
+
+        <!-- Signup Form (Hidden by default) -->
+        <div id="form-signup" class="glass-panel hidden" style="padding: 30px 20px;">
+            <h2>Create Account</h2>
+            <p class="text-muted" style="margin-bottom: 25px;">Join thousands of merchants receiving fast payments.</p>
+            
+            <div class="input-group">
+                <input type="text" id="reg-name" placeholder="Full Legal Name">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <div class="input-group">
+                <input type="text" id="reg-upi" placeholder="Your UPI ID (For Withdrawals)">
+                <i class="fa-brands fa-google-pay"></i>
+            </div>
+            <div class="input-group">
+                <input type="email" id="reg-email" placeholder="Email Address">
+                <i class="fa-solid fa-envelope"></i>
+            </div>
+            <div class="input-group">
+                <input type="password" id="reg-pass" placeholder="Create Password">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            
+            <button class="btn btn-solid" onclick="handleSignup()" style="margin-top: 10px;">
+                <i class="fa-solid fa-user-plus"></i> Create Account
+            </button>
+            
+            <p style="text-align: center; margin-top: 25px; font-size: 0.9rem;">
+                Already have an account? <span class="text-neon" style="cursor: pointer; font-weight: bold;" onclick="toggleAuthForms()">Login Here</span>
+            </p>
+        </div>
+    </div>
+
+
+    <!-- =========================================================
+         MAIN APPLICATION WRAPPER
+         ========================================================= -->
+    <div id="app-view" class="hidden">
+        
+        <!-- Top Application Bar -->
+        <header class="top-app-bar">
+            <button class="menu-btn" onclick="toggleSidebar()">
+                <i class="fa-solid fa-bars-staggered"></i>
+            </button>
+            <div style="font-weight: 700; font-size: 1.2rem; letter-spacing: 1px;" class="text-neon">
+                <i class="fa-solid fa-bolt"></i> CODEIFY
+            </div>
+            <!-- Clicking profile chip now directly opens Profile page -->
+            <div class="profile-chip" onclick="switchPage('profile')">
+                <span id="header-balance">₹0.00</span>
+                <img src="https://ui-avatars.com/api/?name=User&background=39ff14&color=000" id="header-avatar" alt="User">
+            </div>
+        </header>
+
+        <!-- Sidebar Overlay & Drawer -->
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="avatar" id="side-avatar-icon"><i class="fa-solid fa-user-astronaut"></i></div>
+                <h3 id="side-name">Loading...</h3>
+                <p id="side-email">loading@codeify.com</p>
+                <div class="badge badge-success" style="margin-top: 10px; display: inline-block;">
+                    <i class="fa-solid fa-circle-check"></i> Verified Merchant
+                </div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <a class="sidebar-item" onclick="switchPage('home'); toggleSidebar()"><i class="fa-solid fa-house"></i> Dashboard</a>
+                <a class="sidebar-item" onclick="switchPage('profile'); toggleSidebar()"><i class="fa-solid fa-user-gear"></i> Account Settings</a>
+                <a class="sidebar-item" onclick="switchPage('premium'); toggleSidebar()"><i class="fa-solid fa-crown"></i> Subscriptions</a>
+                <a class="sidebar-item" onclick="switchPage('chat'); toggleSidebar()"><i class="fa-solid fa-headset"></i> Help & Support</a>
+                <a class="sidebar-item" style="margin-top: 20px; color: var(--danger);" onclick="handleLogout()">
+                    <i class="fa-solid fa-right-from-bracket" style="color: var(--danger);"></i> Secure Logout
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer text-muted flex-center" style="font-size: 0.8rem; gap: 5px;">
+                Codeify Pay v2.0.1 <i class="fa-solid fa-shield-halved text-neon"></i>
+            </div>
+        </aside>
+
+        <!-- PAGE 1: HOME / DASHBOARD -->
+        <main id="page-home" class="container page-section">
+            <div class="glass-panel" style="padding: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; background: rgba(57,255,20,0.05);">
+                <i class="fa-solid fa-bullhorn text-neon" style="font-size: 1.5rem;"></i>
+                <div>
+                    <h4 style="margin-bottom: 2px;">Notice</h4>
+                    <p class="text-muted" style="font-size: 0.8rem;">Upgrade to Premium to unlock 1% lowest market fee and unlimited API link generation.</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="glass-panel stat-card">
+                    <i class="fa-solid fa-wallet"></i>
+                    <span class="label">Available Balance</span>
+                    <span class="value neon-val">₹<span id="stat-bal">0.00</span></span>
+                </div>
+                <div class="glass-panel stat-card">
+                    <i class="fa-solid fa-money-bill-transfer"></i>
+                    <span class="label">Total Withdrawn</span>
+                    <span class="value">₹<span id="stat-withdrawn">0.00</span></span>
+                </div>
+                <div class="glass-panel stat-card">
+                    <i class="fa-solid fa-link"></i>
+                    <span class="label">Active Links</span>
+                    <span class="value" id="stat-links">0</span>
+                </div>
+                <div class="glass-panel stat-card">
+                    <i class="fa-solid fa-check-double"></i>
+                    <span class="label">Success Txns</span>
+                    <span class="value" id="stat-success">0</span>
+                </div>
+            </div>
+
+            <div class="flex-row" style="margin: 25px 0 15px;">
+                <h3>Recent Transactions</h3>
+                <span class="text-neon" style="font-size: 0.85rem; cursor: pointer;" onclick="switchPage('create')">View All</span>
+            </div>
+            
+            <div id="recent-tx-list">
+                <!-- Skeleton Loader Example -->
+                <div class="glass-panel list-card skeleton" style="height: 70px;"></div>
+                <div class="glass-panel list-card skeleton" style="height: 70px;"></div>
+            </div>
+        </main>
+
+
+        <!-- PAGE 2: CREATE LINK -->
+        <main id="page-create" class="container page-section">
+            <div class="glass-panel" style="padding: 25px 20px;">
+                <h2 style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-wand-magic-sparkles text-neon"></i> Generate Payment Link
+                </h2>
+                <p class="text-muted" style="margin-bottom: 20px;">Create an instant UPI payment intent link to share with your customers.</p>
+
+                <div class="input-group">
+                    <input type="number" id="link-amt" placeholder="Enter Amount (₹)" oninput="calculateFee()">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                </div>
+                
+                <!-- Dynamic Fee Calculator Box -->
+                <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px; font-size: 0.9rem; border: 1px dashed var(--glass-border);">
+                    <div class="flex-row" style="margin-bottom: 8px;">
+                        <span class="text-muted">Platform Fee (<span id="calc-fee-pct">5</span>%)</span>
+                        <span style="color: var(--danger);">- ₹<span id="calc-fee-amt">0.00</span></span>
+                    </div>
+                    <div class="flex-row" style="border-top: 1px solid var(--glass-border); padding-top: 8px;">
+                        <strong>You will receive</strong>
+                        <strong class="text-neon" style="font-size: 1.2rem;">₹<span id="calc-recv-amt">0.00</span></strong>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="link-seller" placeholder="Your Business / Shop Name">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="link-buyer" placeholder="Customer Name (Optional)">
+                    <i class="fa-solid fa-user-tag"></i>
+                </div>
+
+                <button class="btn btn-solid" onclick="generatePaymentLink()">
+                    <i class="fa-solid fa-link"></i> Create Secure Link
+                </button>
+            </div>
+
+            <h3 style="margin: 30px 0 15px;">Your Generated Links</h3>
+            <div id="all-links-list">
+                <!-- Injected via JS -->
+            </div>
+        </main>
+
+
+        <!-- PAGE 3: WITHDRAW -->
+        <main id="page-withdraw" class="container page-section">
+            <div class="glass-panel" style="padding: 25px 20px;">
+                <div class="flex-row" style="margin-bottom: 20px;">
+                    <h2>Withdraw Funds</h2>
+                    <div class="badge badge-success"><i class="fa-solid fa-bolt"></i> Instant</div>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <p class="text-muted">Available to Withdraw</p>
+                    <h1 class="text-neon" style="font-size: 2.5rem;">₹<span id="withdraw-max">0.00</span></h1>
+                </div>
+
+                <div class="input-group">
+                    <select id="withdraw-method" onchange="updateWithdrawPlaceholder()">
+                        <option value="UPI">UPI Transfer (Min ₹50)</option>
+                        <option value="IMPS">Bank IMPS (Min ₹500)</option>
+                        <option value="Crypto">Crypto USDT (Min ₹1000)</option>
+                    </select>
+                    <i class="fa-solid fa-money-check-dollar"></i>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="withdraw-address" placeholder="Enter UPI ID (e.g. name@okicici)">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+
+                <div class="input-group">
+                    <input type="number" id="withdraw-amount" placeholder="Enter Amount to Withdraw">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                </div>
+
+                <button class="btn btn-solid" onclick="submitWithdrawal()">
+                    <i class="fa-solid fa-paper-plane"></i> Send Withdrawal Request
+                </button>
+            </div>
+
+            <h3 style="margin: 30px 0 15px;">Recent Payouts</h3>
+            <div id="withdraw-history">
+                <!-- Injected via JS -->
+            </div>
+        </main>
+
+
+        <!-- PAGE 4: PREMIUM -->
+        <main id="page-premium" class="container page-section">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <i class="fa-solid fa-crown text-neon" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                <h2>Codeify <span class="text-neon">PRO</span></h2>
+                <p class="text-muted">Supercharge your business with lower fees and advanced API limits.</p>
+            </div>
+
+            <!-- Current Plan Box -->
+            <div class="glass-panel" style="padding: 20px; margin-bottom: 30px; border: 1px solid var(--neon-green); background: rgba(57,255,20,0.05);">
+                <div class="flex-row">
+                    <div>
+                        <p class="text-muted" style="font-size: 0.8rem;">Current Plan</p>
+                        <h3 id="current-plan-name">Free Basic</h3>
+                    </div>
+                    <div style="text-align: right;">
+                        <p class="text-muted" style="font-size: 0.8rem;">Platform Fee</p>
+                        <h3 class="text-neon"><span id="current-plan-fee">5</span>%</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing Tables -->
+            <div class="glass-panel pricing-card">
+                <h3>Starter Monthly</h3>
+                <div class="price">₹49<span>/mo</span></div>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-check"></i> Generate up to 100 Links/mo</li>
+                    <li><i class="fa-solid fa-check"></i> Reduced Fee: 3%</li>
+                    <li><i class="fa-solid fa-check"></i> Priority Email Support</li>
+                </ul>
+                <button class="btn" onclick="initiatePurchase('Starter', 49)"><i class="fa-brands fa-telegram"></i> Buy via Telegram</button>
+            </div>
+
+            <div class="glass-panel pricing-card popular">
+                <div class="popular-badge">BEST</div>
+                <h3>Business Annual</h3>
+                <div class="price">₹499<span>/yr</span></div>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-check"></i> <b>Unlimited</b> Link Generation</li>
+                    <li><i class="fa-solid fa-check"></i> Lowest Fee: <b>1%</b></li>
+                    <li><i class="fa-solid fa-check"></i> Dedicated Account Manager</li>
+                    <li><i class="fa-solid fa-check"></i> Custom QR Branding</li>
+                </ul>
+                <button class="btn btn-solid" onclick="initiatePurchase('Business', 499)"><i class="fa-brands fa-telegram"></i> Get Business PRO</button>
+            </div>
+        </main>
+
+
+        <!-- PAGE 5: CHAT / SUPPORT -->
+        <main id="page-chat" class="container page-section" style="padding-bottom: 0;">
+            <div class="glass-panel chat-wrapper">
+                <div class="flex-row" style="padding: 15px; border-bottom: 1px solid var(--glass-border); background: rgba(0,0,0,0.2);">
+                    <div class="flex-row" style="gap: 10px;">
+                        <div style="position: relative;">
+                            <img src="https://ui-avatars.com/api/?name=Support&background=39ff14&color=000" style="width: 40px; border-radius: 50%;">
+                            <div style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: var(--success); border-radius: 50%; border: 2px solid #000;"></div>
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; font-size: 1rem;">Codeify Support</h4>
+                            <p class="text-muted" style="font-size: 0.75rem;">Usually replies in 5 mins</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-box" id="chat-messages">
+                    <div class="chat-bubble chat-recv">
+                        Hi there! 👋 Welcome to Codeify Premium Support. How can we help you today?
+                        <span class="chat-time">System • Now</span>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="Type your message..." onkeypress="handleChatKeyPress(event)">
+                    <button class="chat-btn" onclick="sendMessage()">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- PAGE 6: PROFILE & SETTINGS -->
+        <main id="page-profile" class="container page-section">
+            <div class="glass-panel" style="padding: 30px 20px; text-align: center;">
+                <div style="position: relative; display: inline-block; margin-bottom: 15px;">
+                    <img src="https://ui-avatars.com/api/?name=User&background=39ff14&color=000" id="prof-avatar" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--neon-green);">
+                    <div style="position: absolute; bottom: 5px; right: 5px; background: #fff; color: #000; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                </div>
+                <h2 id="prof-name">User Name</h2>
+                <p class="text-muted" id="prof-email">user@email.com</p>
+                <div class="badge badge-success" style="margin-top: 10px; display: inline-block;">Account Active</div>
+            </div>
+
+            <h3 style="margin: 25px 0 15px;">Security Settings</h3>
+            <div class="glass-panel list-card flex-row" style="padding: 20px;">
+                <div>
+                    <h4 style="margin: 0;">UPI Details</h4>
+                    <p class="text-muted" id="prof-upi">Not set</p>
+                </div>
+                <button class="btn btn-small">Edit</button>
+            </div>
+            <div class="glass-panel list-card flex-row" style="padding: 20px;">
+                <div>
+                    <h4 style="margin: 0;">Change Password</h4>
+                    <p class="text-muted">Last changed 30 days ago</p>
+                </div>
+                <button class="btn btn-small">Update</button>
+            </div>
+            <button class="btn btn-danger" style="margin-top: 20px;" onclick="handleLogout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Secure Logout
+            </button>
+        </main>
+
+        <!-- Bottom Navigation Bar (ALL PAGES INCLUDED) -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" data-target="home" onclick="switchPage('home')">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" data-target="create" onclick="switchPage('create')">
+                <i class="fa-solid fa-circle-plus"></i>
+                <span>Create</span>
+            </div>
+            <div class="nav-item" data-target="withdraw" onclick="switchPage('withdraw')">
+                <i class="fa-solid fa-building-columns"></i>
+                <span>Payout</span>
+            </div>
+            <div class="nav-item" data-target="premium" onclick="switchPage('premium')">
+                <i class="fa-solid fa-crown"></i>
+                <span>Pro</span>
+            </div>
+            <!-- Added Support Chat to Bottom Nav -->
+            <div class="nav-item" data-target="chat" onclick="switchPage('chat')">
+                <i class="fa-solid fa-headset"></i>
+                <span>Support</span>
+            </div>
+        </nav>
+
+    </div>
+
+    <!-- =========================================================
+         JAVASCRIPT & FIREBASE INTEGRATION
+         ========================================================= -->
+    <!-- Modular Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, set, get, update, push, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBv2Um04tsv8z2XItB4j-gLb9yU5qDyogU",
+            authDomain: "all-time-18453.firebaseapp.com",
+            databaseURL: "https://all-time-18453-default-rtdb.firebaseio.com",
+            projectId: "all-time-18453",
+            storageBucket: "all-time-18453.firebasestorage.app",
+            messagingSenderId: "102266317328",
+            appId: "1:102266317328:web:4696ae769dae2b081c3895"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        
+        let currentUser = null;
+        let userData = { fee_percent: 5, balance: 0 }; // Defaults
+
+        /* =========================================================
+           UI HELPER FUNCTIONS (Toasts, Routing, Navigation)
+           ========================================================= */
+        
+        // Custom Toast System
+        window.showToast = (message, type = 'success') => {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.4s forwards';
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        };
+
+        // Auth Form Toggler
+        window.toggleAuthForms = () => {
+            const login = document.getElementById('form-login');
+            const signup = document.getElementById('form-signup');
+            if (login.classList.contains('hidden')) {
+                login.classList.remove('hidden');
+                signup.classList.add('hidden');
+            } else {
+                login.classList.add('hidden');
+                signup.classList.remove('hidden');
+            }
+        };
+
+        // Sidebar Toggle
+        window.toggleSidebar = () => {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebar-overlay').classList.toggle('active');
+        };
+
+        // Page Router
+        window.switchPage = (pageId) => {
+            // Hide all pages
+            document.querySelectorAll('.page-section').forEach(page => {
+                if(page.id !== 'auth-view') page.classList.remove('active-page');
+            });
+            // Show target
+            document.getElementById(`page-${pageId}`).classList.add('active-page');
+            
+            // Update Bottom Nav if applicable
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            const activeNav = document.querySelector(`.nav-item[data-target="${pageId}"]`);
+            if (activeNav) activeNav.classList.add('active');
+
+            // Specific page triggers
+            if(pageId === 'chat') scrollToBottomChat();
+        };
+
+        // Utility: Copy to Clipboard
+        window.copyToClip = (text) => {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Payment link copied to clipboard!");
+            });
+        };
+
+        /* =========================================================
+           AUTHENTICATION LOGIC
+           ========================================================= */
+        
+        window.handleSignup = async () => {
+            const name = document.getElementById('reg-name').value.trim();
+            const upi = document.getElementById('reg-upi').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const pass = document.getElementById('reg-pass').value;
+
+            if(!name || !upi || !email || !pass) return showToast("Please fill all fields required.", "error");
+            if(pass.length < 6) return showToast("Password must be at least 6 characters.", "error");
+
+            try {
+                showToast("Creating your secure account...", "success");
+                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                
+                // Construct initial user payload
+                const newUserPayload = {
+                    uid: cred.user.uid,
+                    name: name,
+                    email: email,
+                    upi: upi,
+                    balance: 0,
+                    fee_percent: 5, // Default 5%
+                    plan: 'Free Basic',
+                    total_links: 0,
+                    total_success: 0,
+                    total_withdrawal: 0,
+                    created_at: Date.now()
+                };
+
+                await set(ref(db, `users/${cred.user.uid}`), newUserPayload);
+                showToast("Registration successful! Logging in...");
+            } catch (error) {
+                showToast(error.message.replace('Firebase: ', ''), "error");
+            }
+        };
+
+        window.handleLogin = async () => {
+            const email = document.getElementById('log-email').value.trim();
+            const pass = document.getElementById('log-pass').value;
+            if(!email || !pass) return showToast("Enter email and password.", "error");
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                showToast("Login Successful! Welcome back.");
+            } catch (error) {
+                showToast("Invalid Credentials. Please try again.", "error");
+            }
+        };
+
+        window.handleLogout = async () => {
+            if(confirm("Are you sure you want to securely logout?")) {
+                await signOut(auth);
+                window.location.reload();
+            }
+        };
+
+        // Monitor Auth State
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-view').classList.add('hidden');
+                document.getElementById('app-view').classList.remove('hidden');
+                switchPage('home');
+                
+                // Initialize Data Streams
+                initDataListeners();
+            } else {
+                currentUser = null;
+                document.getElementById('auth-view').classList.remove('hidden');
+                document.getElementById('app-view').classList.add('hidden');
+            }
+        });
+
+        /* =========================================================
+           REAL-TIME DATABASE LISTENERS & DOM UPDATES
+           ========================================================= */
+
+        function initDataListeners() {
+            // 1. User Profile Listener
+            onValue(ref(db, `users/${currentUser.uid}`), (snapshot) => {
+                const data = snapshot.val();
+                if(!data) return;
+                userData = data;
+
+                // Update Header / Sidebar / Profile
+                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=39ff14&color=000&bold=true`;
+                document.getElementById('header-avatar').src = avatarUrl;
+                document.getElementById('prof-avatar').src = avatarUrl;
+                document.getElementById('side-name').innerText = data.name;
+                document.getElementById('side-email').innerText = data.email;
+                document.getElementById('prof-name').innerText = data.name;
+                document.getElementById('prof-email').innerText = data.email;
+                document.getElementById('prof-upi').innerText = data.upi || "Not set";
+                
+                // Update Stats
+                document.getElementById('header-balance').innerText = `₹${(data.balance || 0).toFixed(2)}`;
+                document.getElementById('stat-bal').innerText = (data.balance || 0).toFixed(2);
+                document.getElementById('stat-withdrawn').innerText = (data.total_withdrawal || 0).toFixed(2);
+                document.getElementById('stat-links').innerText = data.total_links || 0;
+                document.getElementById('stat-success').innerText = data.total_success || 0;
+                document.getElementById('withdraw-max').innerText = (data.balance || 0).toFixed(2);
+
+                // Update Premium Display
+                document.getElementById('calc-fee-pct').innerText = data.fee_percent || 5;
+                document.getElementById('current-plan-name').innerText = data.plan || "Free Basic";
+                document.getElementById('current-plan-fee').innerText = data.fee_percent || 5;
+                
+                // Pre-fill seller name based on user name
+                if(!document.getElementById('link-seller').value) {
+                    document.getElementById('link-seller').value = data.name;
+                }
+            });
+
+            // 2. Transactions Listener (Links)
+            const txQuery = query(ref(db, 'transactions'), orderByChild('uid'), equalTo(currentUser.uid));
+            onValue(txQuery, (snapshot) => {
+                let htmlAll = '';
+                let htmlRecent = '';
+                let count = 0;
+                const transactions = [];
+
+                // Convert to array to reverse sort by date
+                snapshot.forEach(child => { transactions.push(child.val()); });
+                transactions.sort((a,b) => b.created_at - a.created_at);
+
+                if(transactions.length === 0) {
+                    document.getElementById('all-links-list').innerHTML = `<p class="text-muted" style="text-align:center;">No links generated yet.</p>`;
+                    document.getElementById('recent-tx-list').innerHTML = `<p class="text-muted" style="text-align:center;">No recent activity.</p>`;
+                    return;
+                }
+
+                transactions.forEach(tx => {
+                    const statusClass = tx.status === 'Success' ? 'success-border' : (tx.status === 'Processing' ? 'pending-border' : '');
+                    const badgeClass = tx.status === 'Success' ? 'badge-success' : (tx.status === 'Processing' ? 'badge-pending' : 'badge-danger');
+                    const dateStr = new Date(tx.created_at).toLocaleString('en-IN', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+
+                    const card = `
+                    <div class="glass-panel list-card ${statusClass}">
+                        <div class="list-header">
+                            <span class="amount text-neon">₹${tx.amount}</span>
+                            <span class="badge ${badgeClass}">${tx.status}</span>
+                        </div>
+                        <div class="list-details">
+                            <span>To: ${tx.buyer || 'Guest'}</span>
+                            <span>${dateStr}</span>
+                        </div>
+                        <div class="flex-row" style="margin-top: 10px;">
+                            <span style="font-size:0.75rem; color:var(--text-muted); font-family:monospace;">ID: ${tx.transaction_id.substring(1,9)}...</span>
+                            <button class="btn btn-small" onclick="copyToClip('${tx.payment_link}')">
+                                <i class="fa-solid fa-copy"></i> Copy URL
+                            </button>
+                        </div>
+                    </div>`;
+                    
+                    htmlAll += card;
+                    if(count < 3) htmlRecent += card; // Only show 3 on dashboard
+                    count++;
+                });
+
+                document.getElementById('all-links-list').innerHTML = htmlAll;
+                document.getElementById('recent-tx-list').innerHTML = htmlRecent;
+            });
+
+            // 3. Withdrawals Listener
+            const wQuery = query(ref(db, 'withdrawals'), orderByChild('uid'), equalTo(currentUser.uid));
+            onValue(wQuery, (snapshot) => {
+                let html = '';
+                const wData = [];
+                snapshot.forEach(child => wData.push(child.val()));
+                wData.sort((a,b) => b.created_at - a.created_at);
+
+                if(wData.length === 0) {
+                    document.getElementById('withdraw-history').innerHTML = `<p class="text-muted" style="text-align:center;">No withdrawal history.</p>`;
+                    return;
+                }
+
+                wData.forEach(w => {
+                    const bClass = w.status === 'Approved' ? 'badge-success' : (w.status === 'Rejected' ? 'badge-danger' : 'badge-pending');
+                    html += `
+                    <div class="glass-panel list-card">
+                        <div class="list-header">
+                            <span class="amount">₹${w.amount} <span style="font-size:0.8rem; color:var(--text-muted);">via ${w.method}</span></span>
+                            <span class="badge ${bClass}">${w.status}</span>
+                        </div>
+                        <div class="list-details" style="margin-top: 8px;">
+                            <span>${w.address}</span>
+                            <span>${new Date(w.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>`;
+                });
+                document.getElementById('withdraw-history').innerHTML = html;
+            });
+
+            // 4. Chat Messages Listener
+            onValue(ref(db, `support/${currentUser.uid}/messages`), (snapshot) => {
+                const box = document.getElementById('chat-messages');
+                // Keep initial system message
+                let innerHtml = `
+                    <div class="chat-bubble chat-recv">
+                        Hi there! 👋 Welcome to Codeify Premium Support. How can we help you today?
+                        <span class="chat-time">System</span>
+                    </div>`;
+                
+                snapshot.forEach(child => {
+                    const msg = child.val();
+                    const cl = msg.sender === 'user' ? 'chat-sent' : 'chat-recv';
+                    const time = new Date(msg.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    innerHtml += `
+                    <div class="chat-bubble ${cl}">
+                        ${msg.text}
+                        <span class="chat-time">${msg.sender === 'user' ? 'You' : 'Admin'} • ${time}</span>
+                    </div>`;
+                });
+                box.innerHTML = innerHtml;
+                scrollToBottomChat();
+            });
+        }
+
+        /* =========================================================
+           CORE FUNCTIONALITIES (Create Link, Withdraw, Chat, Pay)
+           ========================================================= */
+
+        // Dynamic Fee Calculation UI
+        window.calculateFee = () => {
+            const amt = parseFloat(document.getElementById('link-amt').value) || 0;
+            const feePct = userData.fee_percent || 5;
+            const feeAmt = (amt * (feePct / 100));
+            document.getElementById('calc-fee-amt').innerText = feeAmt.toFixed(2);
+            document.getElementById('calc-recv-amt').innerText = (amt - feeAmt).toFixed(2);
+        };
+
+        // Generate the Payment Link
+        window.generatePaymentLink = async () => {
+            const amount = parseFloat(document.getElementById('link-amt').value);
+            const seller = document.getElementById('link-seller').value.trim();
+            const buyer = document.getElementById('link-buyer').value.trim() || "Customer";
+
+            if(!amount || amount <= 0) return showToast("Enter a valid amount.", "error");
+            if(!seller) return showToast("Seller name is required.", "error");
+
+            const btn = document.querySelector('#page-create .btn-solid');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating...`;
+            btn.style.pointerEvents = 'none';
+
+            try {
+                const feePct = userData.fee_percent || 5;
+                const fee = amount * (feePct / 100);
+                
+                const txRef = push(ref(db, 'transactions'));
+                const txId = txRef.key;
+                // Important: Pointing to the host domain logic requested
+                const payment_link = `https://codeify-auto-paymat.xo.je/pay.html?id=${txId}`;
+
+                const payload = {
+                    transaction_id: txId,
+                    uid: currentUser.uid,
+                    amount: amount,
+                    fee: fee,
+                    seller: seller,
+                    buyer: buyer,
+                    status: 'Pending',
+                    created_at: Date.now(),
+                    payment_link: payment_link
+                };
+
+                await set(txRef, payload);
+                // Increment link count
+                await update(ref(db, `users/${currentUser.uid}`), { total_links: (userData.total_links || 0) + 1 });
+
+                showToast("Payment link generated successfully!");
+                document.getElementById('link-amt').value = '';
+                calculateFee(); // Reset visual calculator
+                
+                // Prompt direct copy
+                setTimeout(() => copyToClip(payment_link), 500);
+
+            } catch (error) {
+                showToast("Failed to generate link.", "error");
+            } finally {
+                btn.innerHTML = `<i class="fa-solid fa-link"></i> Create Secure Link`;
+                btn.style.pointerEvents = 'auto';
+            }
+        };
+
+        // Withdraw Logic Setup
+        window.updateWithdrawPlaceholder = () => {
+            const method = document.getElementById('withdraw-method').value;
+            const input = document.getElementById('withdraw-address');
+            if(method === 'UPI') input.placeholder = "Enter UPI ID (e.g. name@bank)";
+            if(method === 'IMPS') input.placeholder = "A/C No + IFSC (Format: ACC,IFSC)";
+            if(method === 'Crypto') input.placeholder = "Enter only Dashpay Address";
+        };
+
+        window.submitWithdrawal = async () => {
+            const method = document.getElementById('withdraw-method').value;
+            const address = document.getElementById('withdraw-address').value.trim();
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+
+            if(!address || !amount) return showToast("Please fill all withdrawal fields.", "error");
+            
+            // Validation
+            if(method === 'UPI' && amount < 50) return showToast("Min UPI withdrawal is ₹50", "error");
+            if(method === 'IMPS' && amount < 70) return showToast("Min IMPS withdrawal is ₹70", "error");
+            if(method === 'Crypto' && amount < 3) return showToast("Min Crypto ( Dashpay) withdrawal is ₹3", "error");
+            if(amount > userData.balance) return showToast("Balance is Not Available Please Check You're balance 🙏.", "error");
+
+            try {
+                // Deduct Balance Immediately (Optimistic UI)
+                const newBal = userData.balance - amount;
+                await update(ref(db, `users/${currentUser.uid}`), { balance: newBal });
+
+                // Push Request
+                const wRef = push(ref(db, 'withdrawals'));
+                await set(wRef, {
+                    id: wRef.key,
+                    uid: currentUser.uid,
+                    name: userData.name,
+                    amount: amount,
+                    method: method,
+                    address: address,
+                    status: 'Pending',
+                    created_at: Date.now()
+                });
+
+                showToast(`Withdrawal of ₹${amount} submitted!`);
+                document.getElementById('withdraw-amount').value = '';
+
+            } catch (e) {
+                showToast("Withdrawal failed.", "error");
+            }
+        };
+
+        // Premium Upgrades (Modified to Open Telegram with Auto-Type)
+        window.initiatePurchase = (planName, price) => {
+            showToast(`Opening Telegram to purchase the ${planName} Plan...`);
+            
+            // Auto-type message required by user
+            const autoMessage = "codeify auto payment giveaway🎁✨  pe plan buy karna hai bro 🤜";
+            
+            // Create Telegram Link
+            const tgUrl = `https://t.me/dev_and_seller?text=${encodeURIComponent(autoMessage)}`;
+            
+            // Open Telegram in new tab/app
+            window.open(tgUrl, '_blank');
+        };
+
+        // Chat System Support
+        window.sendMessage = async () => {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if(!msg) return;
+
+            input.value = ''; // clear instantly
+            const payload = { sender: 'user', text: msg, time: Date.now() };
+            
+            await push(ref(db, `support/${currentUser.uid}/messages`), payload);
+            await update(ref(db, `support/${currentUser.uid}`), { 
+                lastMsg: msg, time: Date.now(), name: userData.name, unreadByAdmin: true 
+            });
+        };
+
+        window.handleChatKeyPress = (e) => {
+            if (e.key === 'Enter') sendMessage();
+        };
+
+        function scrollToBottomChat() {
+            const box = document.getElementById('chat-messages');
+            if(box) box.scrollTop = box.scrollHeight;
+        }
+
+    </script>
+</body>
+</html>
